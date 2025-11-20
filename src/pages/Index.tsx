@@ -85,11 +85,19 @@ const Index = () => {
         .select("*")
         .eq("family_id", familyId);
 
+      // Get primary user profile with vibes
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("name, vibes")
+        .eq("user_id", user!.id)
+        .single();
+
       // Generate itinerary
       const { data, error } = await supabase.functions.invoke("generate-itinerary", {
         body: {
           wish,
           family_members: members || [],
+          primary_user: profileData || null,
         },
       });
 
