@@ -1,31 +1,168 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ThreadAnimation } from "@/components/ThreadAnimation";
 import { WishForm } from "@/components/WishForm";
-import { MagicalItinerary } from "@/components/MagicalItinerary";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, User } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-type AppState = "landing" | "form" | "processing" | "itinerary";
+type AppState = "landing" | "form" | "processing";
 
 const Index = () => {
   const [state, setState] = useState<AppState>("landing");
   const [userWish, setUserWish] = useState("");
+  const [profile, setProfile] = useState<any>(null);
+  const { user, signOut, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth");
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const loadProfile = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user!.id)
+      .single();
+
+    if (data) {
+      setProfile(data);
+      // Check if profile is complete
+      if (!data.name || data.name === "New User") {
+        navigate("/onboarding");
+      }
+    }
+  };
 
   const handleThreadPull = () => {
     setState("form");
   };
 
-  const handleWishSubmit = (wish: string) => {
+  const handleWishSubmit = async (wish: string) => {
     setUserWish(wish);
     setState("processing");
-    // Simulate processing time
-    setTimeout(() => {
-      setState("itinerary");
-    }, 2000);
+
+    try {
+      // Get family members
+      const { data: families } = await supabase
+        .from("families")
+        .select("id")
+        .eq("creator_id", profile.id);
+
+      let familyId = families?.[0]?.id;
+
+      // Create family if doesn't exist
+      if (!familyId) {
+        const { data: newFamily } = await supabase
+          .from("families")
+          .insert({ name: "My Family", creator_id: profile.id })
+          .select()
+          .single();
+        familyId = newFamily?.id;
+      }
+
+      const { data: members } = await supabase
+        .from("family_members")
+        .select("*")
+        .eq("family_id", familyId);
+
+      // Generate itinerary
+      const { data, error } = await supabase.functions.invoke("generate-itinerary", {
+        body: {
+          wish,
+          family_members: members || [],
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Save trip
+      const { data: trip, error: tripError } = await supabase
+        .from("trips")
+        .insert({
+          family_id: familyId,
+          wish_text: wish,
+          itinerary_json: data.itinerary,
+        })
+        .select()
+        .single();
+
+      if (tripError) throw tripError;
+
+      navigate(`/itinerary/${trip.id}`);
+    } catch (error: any) {
+      console.error("Error generating itinerary:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate itinerary",
+        variant: "destructive",
+      });
+      setState("landing");
+    }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse-glow">
+          <Sparkles className="h-12 w-12 text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Navigation */}
+      {user && profile && (
+        <nav className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-b z-50">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              WishThread
+            </h1>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src={profile.avatar_url} />
+                    <AvatarFallback>
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  Profile & Family
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={signOut}>Sign Out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </nav>
+      )}
+
       {/* Hero Section */}
       {state === "landing" && (
         <div className="relative flex flex-col items-center justify-center min-h-screen px-6">
@@ -77,7 +214,6 @@ const Index = () => {
         <div className="flex flex-col items-center justify-center min-h-screen px-6">
           <div className="text-center space-y-8">
             <div className="relative w-32 h-32 mx-auto">
-              {/* Animated threads weaving */}
               <div className="absolute inset-0 animate-thread-explode">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full opacity-20 blur-xl" />
               </div>
@@ -87,25 +223,6 @@ const Index = () => {
               <h2 className="text-2xl font-semibold text-foreground">Weaving your threads...</h2>
               <p className="text-muted-foreground">Creating the perfect day for your family</p>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Itinerary Display */}
-      {state === "itinerary" && (
-        <div className="px-6 py-12 min-h-screen">
-          <MagicalItinerary />
-
-          <div className="max-w-4xl mx-auto mt-12 text-center">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              Save My Perfect Day
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              Join the waitlist for early access and get lifetime free planning
-            </p>
           </div>
         </div>
       )}
