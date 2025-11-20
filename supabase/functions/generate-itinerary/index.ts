@@ -11,21 +11,30 @@ serve(async (req) => {
   }
 
   try {
-    const { wish, family_members } = await req.json();
+    const { wish, family_members, primary_user } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Build the primary user context
+    const primaryUserContext = primary_user 
+      ? `${primary_user.name} (the planner, loves: ${primary_user.vibes?.join(', ') || 'various experiences'})` 
+      : '';
+
     // Build the family context for the prompt
     const familyContext = family_members.map((member: any) => 
-      `${member.name} (age ${member.age || 'unknown'}, ${member.vibes?.join(', ') || 'no preferences'})`
+      `${member.name} (age ${member.age || 'unknown'}, loves: ${member.vibes?.join(', ') || 'various experiences'})`
     ).join(', ');
+
+    const allTravelers = primaryUserContext 
+      ? `${primaryUserContext}${family_members.length > 0 ? ', ' + familyContext : ''}`
+      : familyContext;
 
     const systemPrompt = `You are a Disney World trip planning expert. Create a realistic, magical 3-day itinerary for Walt Disney World based on the family's wish.
 
-Family members: ${familyContext}
+Travelers: ${allTravelers}
 
 Create a balanced itinerary that considers:
 - Ages and preferences of family members

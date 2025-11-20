@@ -99,6 +99,7 @@ export type Database = {
           id: string
           name: string
           user_id: string
+          vibes: string[] | null
         }
         Insert: {
           avatar_url?: string | null
@@ -107,6 +108,7 @@ export type Database = {
           id?: string
           name: string
           user_id: string
+          vibes?: string[] | null
         }
         Update: {
           avatar_url?: string | null
@@ -115,6 +117,7 @@ export type Database = {
           id?: string
           name?: string
           user_id?: string
+          vibes?: string[] | null
         }
         Relationships: []
       }

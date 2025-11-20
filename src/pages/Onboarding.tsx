@@ -5,18 +5,20 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { AvatarPicker } from "@/components/onboarding/AvatarPicker";
 import { FamilyRolePicker } from "@/components/onboarding/FamilyRolePicker";
 import { FamilyMemberBuilder } from "@/components/onboarding/FamilyMemberBuilder";
+import { UserVibesPicker } from "@/components/onboarding/UserVibesPicker";
 
-type Step = "profile" | "family" | "complete";
+type Step = "profile" | "vibes" | "family" | "complete";
 
 const Onboarding = () => {
   const [step, setStep] = useState<Step>("profile");
   const [name, setName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [familyRole, setFamilyRole] = useState<"mom" | "dad" | "grandparent" | "kid" | "other">("other");
+  const [userVibes, setUserVibes] = useState<string[]>([]);
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -47,6 +49,30 @@ const Onboarding = () => {
           name,
           avatar_url: avatarUrl,
           family_role: familyRole,
+        })
+        .eq("user_id", user!.id);
+
+      if (error) throw error;
+
+      setStep("vibes");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVibesSubmit = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          vibes: userVibes,
         })
         .eq("user_id", user!.id);
 
@@ -180,7 +206,7 @@ const Onboarding = () => {
           </div>
         )}
 
-        {step === "family" && (
+        {step === "vibes" && (
           <div className="space-y-6">
             <Button
               variant="ghost"
@@ -192,8 +218,43 @@ const Onboarding = () => {
             </Button>
 
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold">Who's coming on this trip?</h1>
-              <p className="text-muted-foreground">Add your travel companions</p>
+              <Heart className="w-12 h-12 mx-auto text-primary animate-pulse" />
+              <h1 className="text-3xl font-bold">What's YOUR Perfect Disney Day?</h1>
+              <p className="text-muted-foreground">Pick what makes your heart sing ✨</p>
+            </div>
+
+            <div className="bg-card p-8 rounded-lg border space-y-6">
+              <div className="space-y-4">
+                <label className="text-sm font-medium">Your Disney Vibes</label>
+                <UserVibesPicker value={userVibes} onChange={setUserVibes} />
+              </div>
+
+              <Button
+                onClick={handleVibesSubmit}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-primary via-secondary to-accent"
+              >
+                Continue
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === "family" && (
+          <div className="space-y-6">
+            <Button
+              variant="ghost"
+              onClick={() => setStep("vibes")}
+              className="mb-4"
+            >
+              <ChevronLeft className="mr-2 h-5 w-5" />
+              Back
+            </Button>
+
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold">Who's Coming With You?</h1>
+              <p className="text-muted-foreground">Add your travel companions (optional)</p>
             </div>
 
             <div className="bg-card p-8 rounded-lg border space-y-6">
