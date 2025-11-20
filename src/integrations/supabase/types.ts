@@ -193,7 +193,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_profile_id: { Args: { _user_id: string }; Returns: string }
+      user_has_family_access: {
+        Args: { _family_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       family_role: "mom" | "dad" | "grandparent" | "kid" | "other"
