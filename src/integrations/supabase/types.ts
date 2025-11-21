@@ -197,6 +197,10 @@ export type Database = {
     }
     Functions: {
       get_user_profile_id: { Args: { _user_id: string }; Returns: string }
+      is_users_profile: {
+        Args: { _profile_id: string; _user_id: string }
+        Returns: boolean
+      }
       user_has_family_access: {
         Args: { _family_id: string; _user_id: string }
         Returns: boolean
