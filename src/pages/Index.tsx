@@ -45,6 +45,7 @@ const Index = () => {
       .single();
 
     if (data) {
+      console.log("Profile loaded:", data);
       setProfile(data);
       // Check if profile is complete
       if (!data.name || data.name === "New User") {
@@ -133,6 +134,7 @@ const Index = () => {
   };
 
   const getIconComponent = (avatarUrl: string) => {
+    console.log("Getting icon for:", avatarUrl);
     if (!avatarUrl?.startsWith('icon-')) return null;
     
     const iconMap: Record<string, any> = {
