@@ -62,7 +62,7 @@ const Index = () => {
     setState("processing");
 
     try {
-      // Get family members
+      // Get or create family
       const { data: families } = await supabase
         .from("families")
         .select("id")
@@ -70,14 +70,16 @@ const Index = () => {
 
       let familyId = families?.[0]?.id;
 
-      // Create family if doesn't exist
+      // Create family if doesn't exist using secure RPC function
       if (!familyId) {
-        const { data: newFamily } = await supabase
-          .from("families")
-          .insert({ name: "My Family", creator_id: profile.id })
-          .select()
-          .single();
-        familyId = newFamily?.id;
+        const { data: newFamilyId, error: familyError } = await supabase
+          .rpc("create_family_with_members", {
+            _name: "My Family",
+            _members: [],
+          });
+        
+        if (familyError) throw familyError;
+        familyId = newFamilyId;
       }
 
       const { data: members } = await supabase
