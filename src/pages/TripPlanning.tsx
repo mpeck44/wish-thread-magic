@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +18,8 @@ type Step = "budget" | "vision" | "themes" | "review" | "generating";
 export default function TripPlanning() {
   const navigate = useNavigate();
   const { tripId } = useParams();
+  const [searchParams] = useSearchParams();
+  const isFirstTime = searchParams.get("firstTime") === "true";
   const [step, setStep] = useState<Step>("budget");
   const [user, setUser] = useState<any>(null);
   const [familyId, setFamilyId] = useState<string>("");
@@ -152,7 +154,7 @@ export default function TripPlanning() {
         
         if (error) throw error;
         toast.success("Trip updated successfully!");
-        navigate(`/?tripId=${tripId}&showWishForm=true`);
+        navigate(`/itinerary/${tripId}?generating=true`);
       } else {
         // Create new trip
         const { data: newTrip, error } = await supabase
@@ -162,8 +164,14 @@ export default function TripPlanning() {
           .single();
         
         if (error) throw error;
-        toast.success("Trip created successfully!");
-        navigate(`/?tripId=${newTrip.id}&showWishForm=true`);
+        
+        if (isFirstTime) {
+          toast.success("Your profile and first trip are ready! 🎉");
+          navigate("/");
+        } else {
+          toast.success("Trip created successfully!");
+          navigate(`/itinerary/${newTrip.id}?generating=true`);
+        }
       }
     } catch (error: any) {
       console.error("Error saving trip:", error);
@@ -187,11 +195,15 @@ export default function TripPlanning() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-purple-900 mb-2">
-            {tripId ? "Edit Your Trip" : "Plan Your Disney Adventure"}
+            {tripId ? "Edit Your Trip" : isFirstTime ? "Plan Your First Trip! 🎉" : "Plan Your Disney Adventure"}
           </h1>
-          <p className="text-gray-600">Let's plan the perfect vacation</p>
+          <p className="text-gray-600">
+            {isFirstTime ? "Almost there! Let's plan your magical Disney trip" : "Let's plan the perfect vacation"}
+          </p>
           <Progress value={progress} className="mt-4 h-2" />
-          <p className="text-sm text-gray-500 mt-2">Step {currentStepNumber} of {totalSteps}</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {isFirstTime ? `Step ${currentStepNumber + 3} of 7` : `Step ${currentStepNumber} of ${totalSteps}`}
+          </p>
         </div>
 
         <Card className="p-8">
@@ -201,7 +213,7 @@ export default function TripPlanning() {
               accommodationPreference={accommodationPreference}
               onBudgetChange={setBudgetLevel}
               onAccommodationChange={setAccommodationPreference}
-              onBack={() => navigate("/dashboard")}
+              onBack={() => navigate("/")}
               onNext={() => setStep("vision")}
             />
           )}
