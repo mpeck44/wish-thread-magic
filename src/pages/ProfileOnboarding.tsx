@@ -179,13 +179,12 @@ export default function ProfileOnboarding() {
       
       if (completeError) throw completeError;
       
-      toast.success("Profile setup complete!");
-      setStep("complete");
+      toast.success("Profile saved! 🎉", {
+        description: "Now let's plan your first magical trip!"
+      });
       
-      // Redirect to dashboard after a brief delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
+      // Chain to trip planning with firstTime flag
+      navigate("/trip-planning?firstTime=true");
       
     } catch (error: any) {
       console.error("Error completing profile setup:", error);
@@ -300,8 +299,8 @@ export default function ProfileOnboarding() {
               <div className="animate-bounce mb-4">
                 <Sparkles className="w-16 h-16 text-purple-600 mx-auto" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Profile Complete!</h2>
-              <p className="text-gray-600">You're ready to start planning your magical Disney adventures</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Redirecting...</h2>
+              <p className="text-gray-600">Taking you to trip planning!</p>
             </div>
           )}
         </Card>
