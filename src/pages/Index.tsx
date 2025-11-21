@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ThreadAnimation } from "@/components/ThreadAnimation";
 import { WishForm } from "@/components/WishForm";
 import { Button } from "@/components/ui/button";
-import { Sparkles, User } from "lucide-react";
+import { Sparkles, User, Heart, Star, Smile, Sun, Moon, CloudRain } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -132,6 +132,24 @@ const Index = () => {
     }
   };
 
+  const getIconComponent = (avatarUrl: string) => {
+    if (!avatarUrl?.startsWith('icon-')) return null;
+    
+    const iconMap: Record<string, any> = {
+      'icon-user': User,
+      'icon-heart': Heart,
+      'icon-star': Star,
+      'icon-sparkles': Sparkles,
+      'icon-smile': Smile,
+      'icon-sun': Sun,
+      'icon-moon': Moon,
+      'icon-cloud': CloudRain,
+    };
+    
+    const IconComponent = iconMap[avatarUrl];
+    return IconComponent ? <IconComponent className="h-5 w-5 text-primary" /> : <User className="h-5 w-5" />;
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -155,10 +173,18 @@ const Index = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar>
-                    <AvatarImage src={profile.avatar_url} />
-                    <AvatarFallback>
-                      <User className="h-5 w-5" />
-                    </AvatarFallback>
+                    {profile.avatar_url?.startsWith('icon-') ? (
+                      <AvatarFallback className="bg-primary/10">
+                        {getIconComponent(profile.avatar_url)}
+                      </AvatarFallback>
+                    ) : (
+                      <>
+                        <AvatarImage src={profile.avatar_url} />
+                        <AvatarFallback>
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      </>
+                    )}
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
