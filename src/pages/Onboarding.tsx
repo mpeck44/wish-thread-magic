@@ -93,43 +93,12 @@ const Onboarding = () => {
   const handleFamilySubmit = async () => {
     setLoading(true);
     try {
-      // Get user's profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user!.id)
-        .single();
+      const { error } = await supabase.rpc("create_family_with_members", {
+        _name: "My Family",
+        _members: familyMembers,
+      });
 
-      if (!profile) throw new Error("Profile not found");
-
-      // Create family
-      const { data: family, error: familyError } = await supabase
-        .from("families")
-        .insert({
-          name: "My Family",
-          creator_id: profile.id,
-        })
-        .select()
-        .single();
-
-      if (familyError) throw familyError;
-
-      // Add family members
-      if (familyMembers.length > 0) {
-        const membersToInsert = familyMembers.map((member) => ({
-          family_id: family.id,
-          name: member.name,
-          age: member.age,
-          vibes: member.vibes,
-          is_child: member.age < 18,
-        }));
-
-        const { error: membersError } = await supabase
-          .from("family_members")
-          .insert(membersToInsert);
-
-        if (membersError) throw membersError;
-      }
+      if (error) throw error;
 
       setStep("complete");
       setTimeout(() => {

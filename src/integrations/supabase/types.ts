@@ -196,6 +196,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_family_with_members: {
+        Args: { _members: Json; _name: string }
+        Returns: string
+      }
       get_user_profile_id: { Args: { _user_id: string }; Returns: string }
       is_users_profile: {
         Args: { _profile_id: string; _user_id: string }
