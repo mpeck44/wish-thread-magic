@@ -1,46 +1,74 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { wish, family_members, primary_user } = await req.json();
+    const { tripId, tripData, familyMembers, profile } = await req.json();
+    
+    console.log("Generating itinerary for trip:", tripId);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Build the primary user context
-    const primaryUserContext = primary_user 
-      ? `${primary_user.name} (the planner, loves: ${primary_user.vibes?.join(', ') || 'various experiences'})` 
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Supabase configuration missing");
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Build context for AI
+    const primaryUserContext = profile 
+      ? `${profile.name} (the planner, role: ${profile.family_role}, loves: ${profile.vibes?.join(', ') || 'various experiences'})` 
       : '';
 
-    // Build the family context for the prompt
-    const familyContext = family_members.map((member: any) => 
-      `${member.name} (age ${member.age || 'unknown'}, loves: ${member.vibes?.join(', ') || 'various experiences'})`
+    const familyContext = (familyMembers || []).map((member: any) => 
+      `${member.name} (age ${member.age || 'unknown'}, energy: ${member.energy_level || 'moderate'}, interests: ${member.vibes?.join(', ') || 'various experiences'})`
     ).join(', ');
 
     const allTravelers = primaryUserContext 
-      ? `${primaryUserContext}${family_members.length > 0 ? ', ' + familyContext : ''}`
+      ? `${primaryUserContext}${familyMembers.length > 0 ? ', ' + familyContext : ''}`
       : familyContext;
 
-    const systemPrompt = `You are a Disney World trip planning expert. Create a realistic, magical 3-day itinerary for Walt Disney World based on the family's wish.
+    // Build trip details
+    const tripDetails = `
+Trip Duration: ${tripData.trip_duration} days
+Budget Level: ${tripData.budget_level}
+Accommodation: ${tripData.accommodation_preference}
+Pace Preference: ${tripData.pace_preference}
+Special Occasions: ${tripData.special_occasions?.join(', ') || 'None'}
+Must-Do Experiences: ${tripData.must_do_experiences || 'None specified'}
+Theme Days Enabled: ${tripData.theme_days_enabled ? 'Yes' : 'No'}
+${tripData.theme_days_enabled ? `Theme Day Preferences: ${tripData.theme_day_preferences?.join(', ')}` : ''}
+Additional Notes: ${tripData.additional_notes || 'None'}
+`;
+
+    const systemPrompt = `You are a Disney World trip planning expert. Create a realistic, magical ${tripData.trip_duration}-day itinerary for Walt Disney World.
 
 Travelers: ${allTravelers}
 
+${tripDetails}
+
 Create a balanced itinerary that considers:
-- Ages and preferences of family members
+- Ages, energy levels, and preferences of family members
+- The specified budget level and pace preference
+- Special occasions and must-do experiences
+- Theme day preferences if enabled
 - Realistic wait times and park logistics
 - Mix of popular attractions, dining, and rest periods
-- Magic moments that match their wish
+- Magic moments that match their preferences
 
 Output ONLY valid JSON matching this exact schema:
 {
@@ -63,13 +91,18 @@ Output ONLY valid JSON matching this exact schema:
 }
 
 Rules:
-- Include 5-7 attractions per day
-- Include 2-3 dining experiences per day
-- Include 1 rest/relaxation period per day
-- Vary parks across the 3 days (Magic Kingdom, EPCOT, Hollywood Studios, or Animal Kingdom)
+- Create ${tripData.trip_duration} days of activities
+- Include 5-8 attractions per day based on pace (${tripData.pace_preference})
+- Include 2-3 dining experiences per day appropriate for budget level
+- Include rest/relaxation periods, especially if there are young children
+- Vary parks across the days (Magic Kingdom, EPCOT, Hollywood Studios, Animal Kingdom)
 - Be specific about locations and times
 - Consider realistic wait times
-- Match activities to family ages and the wish`;
+- Match activities to family ages and preferences
+- Incorporate theme days if enabled
+- Prioritize must-do experiences`;
+
+    console.log("Calling AI to generate itinerary...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -81,7 +114,7 @@ Rules:
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Family wish: ${wish}` },
+          { role: "user", content: `Create the perfect Disney itinerary based on the details above.` },
         ],
         response_format: { type: "json_object" },
       }),
@@ -116,9 +149,24 @@ Rules:
     }
 
     const itinerary = JSON.parse(itineraryText);
+    
+    console.log("Itinerary generated, saving to database...");
+
+    // Save the itinerary to the trip
+    const { error: updateError } = await supabase
+      .from("trips")
+      .update({ itinerary_json: itinerary })
+      .eq("id", tripId);
+
+    if (updateError) {
+      console.error("Error saving itinerary:", updateError);
+      throw updateError;
+    }
+
+    console.log("Itinerary saved successfully!");
 
     return new Response(
-      JSON.stringify({ itinerary }),
+      JSON.stringify({ success: true, itinerary }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

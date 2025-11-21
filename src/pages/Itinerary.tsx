@@ -14,10 +14,27 @@ const Itinerary = () => {
   const { toast } = useToast();
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [polling, setPolling] = useState(false);
 
   useEffect(() => {
     loadTrip();
   }, [id]);
+
+  // Auto-polling when itinerary is not ready
+  useEffect(() => {
+    if (!trip || trip.itinerary_json) return;
+
+    setPolling(true);
+    const interval = setInterval(() => {
+      console.log("Polling for itinerary...");
+      loadTrip();
+    }, 3000); // Poll every 3 seconds
+
+    return () => {
+      clearInterval(interval);
+      setPolling(false);
+    };
+  }, [trip]);
 
   const loadTrip = async () => {
     try {
@@ -28,7 +45,13 @@ const Itinerary = () => {
         .single();
 
       if (error) throw error;
+      
       setTrip(data);
+      
+      // If itinerary is ready, stop polling
+      if (data.itinerary_json) {
+        setPolling(false);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -77,21 +100,21 @@ const Itinerary = () => {
           <div className="animate-bounce mx-auto">
             <Sparkles className="h-16 w-16 text-primary mx-auto" />
           </div>
-          <h1 className="text-3xl font-bold">Your Trip is Being Planned!</h1>
+          <h1 className="text-3xl font-bold">Creating Your Magical Itinerary!</h1>
           <p className="text-lg text-muted-foreground">
-            We're creating your magical Disney itinerary. This usually takes a few moments.
+            Our Disney experts are crafting the perfect trip for you. This usually takes 10-30 seconds.
           </p>
-          <div className="pt-4 space-y-3">
-            <Button onClick={() => loadTrip()} variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Check if Ready
-            </Button>
-            <div>
-              <Button variant="ghost" onClick={() => navigate("/")}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Button>
+          {polling && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              <span>Checking for updates...</span>
             </div>
+          )}
+          <div className="pt-4">
+            <Button variant="ghost" onClick={() => navigate("/")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
           </div>
         </Card>
       </div>
