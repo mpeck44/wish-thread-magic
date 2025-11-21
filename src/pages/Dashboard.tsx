@@ -28,6 +28,7 @@ import {
   Moon,
   CloudRain,
   ArrowRight,
+  CalendarPlus,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -85,14 +86,25 @@ const Dashboard = () => {
 
         setFamilyMembers(membersData || []);
 
-        // Load trip preferences
-        const { data: prefsData } = await supabase
-          .from("trip_preferences")
+        // Load most recent trip preferences from trips table
+        const { data: latestTrip } = await supabase
+          .from("trips")
           .select("*")
           .eq("family_id", familyId)
+          .order("created_at", { ascending: false })
+          .limit(1)
           .maybeSingle();
 
-        setTripPreferences(prefsData);
+        if (latestTrip) {
+          setTripPreferences({
+            accommodation_preference: latestTrip.accommodation_preference,
+            trip_duration: latestTrip.trip_duration,
+            pace_preference: latestTrip.pace_preference,
+            budget_level: latestTrip.budget_level,
+            theme_days_enabled: latestTrip.theme_days_enabled,
+            theme_day_preferences: latestTrip.theme_day_preferences,
+          });
+        }
 
         // Load trips
         const { data: tripsData } = await supabase
@@ -254,71 +266,48 @@ const Dashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Trip Preferences */}
+          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    Trip Preferences
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Quick Actions
                   </CardTitle>
-                  <CardDescription>Your planning details</CardDescription>
+                  <CardDescription>Plan your next adventure</CardDescription>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/onboarding")}>
-                  <Edit className="h-4 w-4" />
-                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {tripPreferences ? (
-                <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Budget Level</span>
-                    <Badge variant="secondary" className="capitalize">
-                      {profile?.budget_level || "Not set"}
-                    </Badge>
+              <div className="grid grid-cols-1 gap-3">
+                <Button 
+                  size="lg"
+                  onClick={() => navigate("/trip-planning")}
+                  className="h-auto py-4 justify-start"
+                >
+                  <CalendarPlus className="w-5 h-5 mr-3" />
+                  <div className="text-left flex-1">
+                    <div className="font-bold">Plan New Trip</div>
+                    <div className="text-xs opacity-90">Start planning your next adventure</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Accommodation</span>
-                    <Badge variant="secondary" className="capitalize">
-                      {tripPreferences.accommodation_preference || "Undecided"}
-                    </Badge>
+                  <ArrowRight className="w-4 h-4 opacity-50" />
+                </Button>
+                
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/profile-onboarding")}
+                  className="h-auto py-4 justify-start"
+                >
+                  <Settings className="w-5 h-5 mr-3" />
+                  <div className="text-left flex-1">
+                    <div className="font-bold">Edit Profile</div>
+                    <div className="text-xs opacity-90">Update your family & interests</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Pace</span>
-                    <Badge variant="secondary" className="capitalize">
-                      {tripPreferences.pace_preference || "Moderate"}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Theme Days</span>
-                    <Badge variant="secondary">
-                      {tripPreferences.theme_days_enabled ? "Enabled" : "Disabled"}
-                    </Badge>
-                  </div>
-                  {tripPreferences.special_occasions?.length > 0 && (
-                    <div>
-                      <span className="text-sm text-muted-foreground block mb-2">Special Occasions</span>
-                      <div className="flex flex-wrap gap-2">
-                        {tripPreferences.special_occasions.map((occasion: string) => (
-                          <Badge key={occasion} variant="outline">
-                            {occasion}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No trip preferences set yet</p>
-                  <Button onClick={() => navigate("/onboarding")} variant="outline">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Set Preferences
-                  </Button>
-                </div>
-              )}
+                  <ArrowRight className="w-4 h-4 opacity-50" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

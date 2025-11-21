@@ -38,7 +38,7 @@ const Index = () => {
     }
   }, [user]);
 
-  // Check if user just completed onboarding
+  // Check if user just completed onboarding or trip planning
   useEffect(() => {
     if (searchParams.get("showWishForm") === "true" && profile) {
       setState("form");
@@ -57,8 +57,13 @@ const Index = () => {
     if (data) {
       console.log("Profile loaded:", data);
       setProfile(data);
-      // Check if profile is complete
-      if (!data.name || data.name === "New User") {
+      
+      // Check if profile is complete, redirect to profile onboarding if not
+      if (!data.profile_complete) {
+        navigate("/profile-onboarding");
+      }
+      // Old check for backward compatibility
+      else if (!data.name || data.name === "New User") {
         navigate("/onboarding");
       }
     }

@@ -112,55 +112,58 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          budget_level: string | null
           created_at: string
           dietary_preferences: string[] | null
           family_role: Database["public"]["Enums"]["family_role"] | null
           id: string
           mobility_needs: string | null
           name: string
+          profile_complete: boolean | null
           trip_planning_complete: boolean | null
           user_id: string
           vibes: string[] | null
         }
         Insert: {
           avatar_url?: string | null
-          budget_level?: string | null
           created_at?: string
           dietary_preferences?: string[] | null
           family_role?: Database["public"]["Enums"]["family_role"] | null
           id?: string
           mobility_needs?: string | null
           name: string
+          profile_complete?: boolean | null
           trip_planning_complete?: boolean | null
           user_id: string
           vibes?: string[] | null
         }
         Update: {
           avatar_url?: string | null
-          budget_level?: string | null
           created_at?: string
           dietary_preferences?: string[] | null
           family_role?: Database["public"]["Enums"]["family_role"] | null
           id?: string
           mobility_needs?: string | null
           name?: string
+          profile_complete?: boolean | null
           trip_planning_complete?: boolean | null
           user_id?: string
           vibes?: string[] | null
         }
         Relationships: []
       }
-      trip_preferences: {
+      trips: {
         Row: {
           accommodation_preference: string | null
           additional_notes: string | null
+          budget_level: string | null
           created_at: string
           dining_style: string | null
           family_id: string
           id: string
+          itinerary_json: Json | null
           must_do_experiences: string | null
           pace_preference: string | null
+          pdf_url: string | null
           photography_priority: string | null
           preferred_parks: string[] | null
           shopping_interest: string | null
@@ -171,16 +174,20 @@ export type Database = {
           updated_at: string
           visit_dates_end: string | null
           visit_dates_start: string | null
+          wish_text: string
         }
         Insert: {
           accommodation_preference?: string | null
           additional_notes?: string | null
+          budget_level?: string | null
           created_at?: string
           dining_style?: string | null
           family_id: string
           id?: string
+          itinerary_json?: Json | null
           must_do_experiences?: string | null
           pace_preference?: string | null
+          pdf_url?: string | null
           photography_priority?: string | null
           preferred_parks?: string[] | null
           shopping_interest?: string | null
@@ -191,16 +198,20 @@ export type Database = {
           updated_at?: string
           visit_dates_end?: string | null
           visit_dates_start?: string | null
+          wish_text: string
         }
         Update: {
           accommodation_preference?: string | null
           additional_notes?: string | null
+          budget_level?: string | null
           created_at?: string
           dining_style?: string | null
           family_id?: string
           id?: string
+          itinerary_json?: Json | null
           must_do_experiences?: string | null
           pace_preference?: string | null
+          pdf_url?: string | null
           photography_priority?: string | null
           preferred_parks?: string[] | null
           shopping_interest?: string | null
@@ -211,43 +222,6 @@ export type Database = {
           updated_at?: string
           visit_dates_end?: string | null
           visit_dates_start?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trip_preferences_family_id_fkey"
-            columns: ["family_id"]
-            isOneToOne: false
-            referencedRelation: "families"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      trips: {
-        Row: {
-          created_at: string
-          family_id: string
-          id: string
-          itinerary_json: Json | null
-          pdf_url: string | null
-          updated_at: string
-          wish_text: string
-        }
-        Insert: {
-          created_at?: string
-          family_id: string
-          id?: string
-          itinerary_json?: Json | null
-          pdf_url?: string | null
-          updated_at?: string
-          wish_text: string
-        }
-        Update: {
-          created_at?: string
-          family_id?: string
-          id?: string
-          itinerary_json?: Json | null
-          pdf_url?: string | null
-          updated_at?: string
           wish_text?: string
         }
         Relationships: [
