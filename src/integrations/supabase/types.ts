@@ -47,31 +47,49 @@ export type Database = {
         Row: {
           age: number | null
           created_at: string
+          dietary_restrictions: string[] | null
+          energy_level: string | null
           family_id: string
+          height_restrictions: boolean | null
           id: string
           is_child: boolean | null
+          mobility_needs: string | null
           name: string
+          nap_schedule: boolean | null
           profile_id: string | null
+          special_interests: string[] | null
           vibes: string[] | null
         }
         Insert: {
           age?: number | null
           created_at?: string
+          dietary_restrictions?: string[] | null
+          energy_level?: string | null
           family_id: string
+          height_restrictions?: boolean | null
           id?: string
           is_child?: boolean | null
+          mobility_needs?: string | null
           name: string
+          nap_schedule?: boolean | null
           profile_id?: string | null
+          special_interests?: string[] | null
           vibes?: string[] | null
         }
         Update: {
           age?: number | null
           created_at?: string
+          dietary_restrictions?: string[] | null
+          energy_level?: string | null
           family_id?: string
+          height_restrictions?: boolean | null
           id?: string
           is_child?: boolean | null
+          mobility_needs?: string | null
           name?: string
+          nap_schedule?: boolean | null
           profile_id?: string | null
+          special_interests?: string[] | null
           vibes?: string[] | null
         }
         Relationships: [
@@ -94,32 +112,115 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          budget_level: string | null
           created_at: string
+          dietary_preferences: string[] | null
           family_role: Database["public"]["Enums"]["family_role"] | null
           id: string
+          mobility_needs: string | null
           name: string
+          trip_planning_complete: boolean | null
           user_id: string
           vibes: string[] | null
         }
         Insert: {
           avatar_url?: string | null
+          budget_level?: string | null
           created_at?: string
+          dietary_preferences?: string[] | null
           family_role?: Database["public"]["Enums"]["family_role"] | null
           id?: string
+          mobility_needs?: string | null
           name: string
+          trip_planning_complete?: boolean | null
           user_id: string
           vibes?: string[] | null
         }
         Update: {
           avatar_url?: string | null
+          budget_level?: string | null
           created_at?: string
+          dietary_preferences?: string[] | null
           family_role?: Database["public"]["Enums"]["family_role"] | null
           id?: string
+          mobility_needs?: string | null
           name?: string
+          trip_planning_complete?: boolean | null
           user_id?: string
           vibes?: string[] | null
         }
         Relationships: []
+      }
+      trip_preferences: {
+        Row: {
+          accommodation_preference: string | null
+          additional_notes: string | null
+          created_at: string
+          dining_style: string | null
+          family_id: string
+          id: string
+          must_do_experiences: string | null
+          pace_preference: string | null
+          photography_priority: string | null
+          preferred_parks: string[] | null
+          shopping_interest: string | null
+          special_occasions: string[] | null
+          theme_day_preferences: Json | null
+          theme_days_enabled: boolean | null
+          trip_duration: number | null
+          updated_at: string
+          visit_dates_end: string | null
+          visit_dates_start: string | null
+        }
+        Insert: {
+          accommodation_preference?: string | null
+          additional_notes?: string | null
+          created_at?: string
+          dining_style?: string | null
+          family_id: string
+          id?: string
+          must_do_experiences?: string | null
+          pace_preference?: string | null
+          photography_priority?: string | null
+          preferred_parks?: string[] | null
+          shopping_interest?: string | null
+          special_occasions?: string[] | null
+          theme_day_preferences?: Json | null
+          theme_days_enabled?: boolean | null
+          trip_duration?: number | null
+          updated_at?: string
+          visit_dates_end?: string | null
+          visit_dates_start?: string | null
+        }
+        Update: {
+          accommodation_preference?: string | null
+          additional_notes?: string | null
+          created_at?: string
+          dining_style?: string | null
+          family_id?: string
+          id?: string
+          must_do_experiences?: string | null
+          pace_preference?: string | null
+          photography_priority?: string | null
+          preferred_parks?: string[] | null
+          shopping_interest?: string | null
+          special_occasions?: string[] | null
+          theme_day_preferences?: Json | null
+          theme_days_enabled?: boolean | null
+          trip_duration?: number | null
+          updated_at?: string
+          visit_dates_end?: string | null
+          visit_dates_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_preferences_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trips: {
         Row: {
