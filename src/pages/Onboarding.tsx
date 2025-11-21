@@ -16,7 +16,7 @@ type Step = "profile" | "vibes" | "family" | "complete";
 const Onboarding = () => {
   const [step, setStep] = useState<Step>("profile");
   const [name, setName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("icon-user");
   const [familyRole, setFamilyRole] = useState<"mom" | "dad" | "grandparent" | "kid" | "other">("other");
   const [userVibes, setUserVibes] = useState<string[]>([]);
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);

@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, User, Clock } from "lucide-react";
+import { ArrowLeft, Plus, User, Clock, Camera, Heart, Star, Sparkles, Smile, Sun, Moon, CloudRain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { AvatarPicker } from "@/components/onboarding/AvatarPicker";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ const Profile = () => {
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingAvatar, setEditingAvatar] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -76,6 +78,48 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarChange = async (newAvatarUrl: string) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: newAvatarUrl })
+        .eq("user_id", user!.id);
+
+      if (error) throw error;
+
+      setProfile({ ...profile, avatar_url: newAvatarUrl });
+      setEditingAvatar(false);
+      toast({
+        title: "Success",
+        description: "Profile picture updated",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile picture",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getIconComponent = (avatarUrl: string) => {
+    if (!avatarUrl?.startsWith('icon-')) return null;
+    
+    const iconMap: Record<string, any> = {
+      'icon-user': User,
+      'icon-heart': Heart,
+      'icon-star': Star,
+      'icon-sparkles': Sparkles,
+      'icon-smile': Smile,
+      'icon-sun': Sun,
+      'icon-moon': Moon,
+      'icon-cloud': CloudRain,
+    };
+    
+    const IconComponent = iconMap[avatarUrl];
+    return IconComponent ? <IconComponent className="h-12 w-12 text-primary" /> : <User className="h-12 w-12" />;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -93,12 +137,40 @@ const Profile = () => {
         </Button>
 
         <div className="text-center space-y-4">
-          <Avatar className="w-24 h-24 mx-auto">
-            <AvatarImage src={profile?.avatar_url} />
-            <AvatarFallback>
-              <User className="h-12 w-12" />
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative inline-block">
+            <Avatar className="w-24 h-24 mx-auto">
+              {profile?.avatar_url?.startsWith('icon-') ? (
+                <AvatarFallback className="bg-primary/10">
+                  {getIconComponent(profile.avatar_url)}
+                </AvatarFallback>
+              ) : (
+                <>
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback>
+                    <User className="h-12 w-12" />
+                  </AvatarFallback>
+                </>
+              )}
+            </Avatar>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+              onClick={() => setEditingAvatar(!editingAvatar)}
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {editingAvatar && (
+            <Card className="p-6 max-w-md mx-auto">
+              <AvatarPicker 
+                value={profile?.avatar_url || ''} 
+                onChange={handleAvatarChange}
+              />
+            </Card>
+          )}
+          
           <div>
             <h1 className="text-3xl font-bold">{profile?.name}</h1>
             <p className="text-muted-foreground capitalize">{profile?.family_role}</p>
