@@ -117,7 +117,9 @@ const Dashboard = () => {
         setTrips(tripsData || []);
       }
     } catch (error: any) {
-      console.error("Error loading dashboard:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error loading dashboard:", error);
+      }
       toast({
         title: "Error loading dashboard",
         description: error.message,

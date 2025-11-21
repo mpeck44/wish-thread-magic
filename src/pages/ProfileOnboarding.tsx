@@ -87,8 +87,10 @@ export default function ProfileOnboarding() {
       if (error) throw error;
       setStep("interests");
     } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to save profile: " + error.message);
+      if (import.meta.env.DEV) {
+        console.error("Error updating profile:", error);
+      }
+      toast.error("Failed to save profile");
     }
   };
 
@@ -106,8 +108,10 @@ export default function ProfileOnboarding() {
       if (error) throw error;
       setStep("family");
     } catch (error: any) {
-      console.error("Error saving interests:", error);
-      toast.error("Failed to save interests: " + error.message);
+      if (import.meta.env.DEV) {
+        console.error("Error saving interests:", error);
+      }
+      toast.error("Failed to save interests");
     }
   };
 
@@ -187,8 +191,10 @@ export default function ProfileOnboarding() {
       navigate("/trip-planning?firstTime=true");
       
     } catch (error: any) {
-      console.error("Error completing profile setup:", error);
-      toast.error("Failed to complete setup: " + error.message);
+      if (import.meta.env.DEV) {
+        console.error("Error completing profile setup:", error);
+      }
+      toast.error("Failed to complete setup");
     }
   };
 

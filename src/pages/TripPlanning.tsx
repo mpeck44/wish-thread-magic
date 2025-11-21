@@ -127,7 +127,9 @@ export default function TripPlanning() {
         setAdditionalNotes(trip.additional_notes || "");
       }
     } catch (error: any) {
-      console.error("Error loading trip:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error loading trip:", error);
+      }
       toast.error("Failed to load trip data");
     }
   };
@@ -212,7 +214,9 @@ export default function TripPlanning() {
       toast.dismiss(generatingToast);
 
       if (genError) {
-        console.error("Error generating itinerary:", genError);
+        if (import.meta.env.DEV) {
+          console.error("Error generating itinerary:", genError);
+        }
         toast.error("Failed to generate itinerary. You can try again from the itinerary page.");
       } else {
         toast.success("Itinerary is being created!");
@@ -225,8 +229,10 @@ export default function TripPlanning() {
         navigate(`/itinerary/${savedTripId}?generating=true`);
       }
     } catch (error: any) {
-      console.error("Error saving trip:", error);
-      toast.error("Failed to save trip: " + error.message);
+      if (import.meta.env.DEV) {
+        console.error("Error saving trip:", error);
+      }
+      toast.error("Failed to save trip");
       setStep("review");
     }
   };
