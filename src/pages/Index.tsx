@@ -201,6 +201,9 @@ const Index = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                  Dashboard
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   Profile & Family
                 </DropdownMenuItem>

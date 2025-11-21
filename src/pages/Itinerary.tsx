@@ -73,10 +73,15 @@ const Itinerary = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-12 px-6">
       <div className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+            <Button variant="ghost" onClick={() => navigate("/")}>
+              Back Home
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleExportCalendar}>
               <Calendar className="mr-2 h-4 w-4" />
