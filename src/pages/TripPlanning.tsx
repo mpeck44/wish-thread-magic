@@ -54,7 +54,7 @@ export default function TripPlanning() {
       // Get profile and check if completed
       const { data: profile } = await supabase
         .from("profiles")
-        .select("*, families!inner(id)")
+        .select("*")
         .eq("user_id", user.id)
         .single();
       
@@ -70,7 +70,19 @@ export default function TripPlanning() {
         return;
       }
       
-      const family = profile.families as any;
+      // Get the family for this profile
+      const { data: family } = await supabase
+        .from("families")
+        .select("id")
+        .eq("creator_id", profile.id)
+        .maybeSingle();
+      
+      if (!family) {
+        toast.error("Family not found. Please complete your profile.");
+        navigate("/profile-onboarding");
+        return;
+      }
+      
       setFamilyId(family.id);
       
       // If editing existing trip, load data
