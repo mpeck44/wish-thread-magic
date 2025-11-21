@@ -113,13 +113,14 @@ const Onboarding = () => {
           }
         }
 
-        // Save trip preferences
-        const { error: prefsError } = await supabase.from("trip_preferences").insert([{
+        // Create initial trip with preferences (profile_complete flow will skip this)
+        const { error: tripError } = await supabase.from("trips").insert([{
           family_id: familyId,
+          wish_text: "Initial setup from onboarding",
           accommodation_preference: accommodationPreference,
           trip_duration: tripDuration,
-          visit_dates_start: dateRange?.from?.toISOString(),
-          visit_dates_end: dateRange?.to?.toISOString(),
+          visit_dates_start: dateRange?.from?.toISOString().split('T')[0],
+          visit_dates_end: dateRange?.to?.toISOString().split('T')[0],
           pace_preference: pacePreference,
           theme_days_enabled: themeDaysEnabled,
           theme_day_preferences: selectedThemes as any,
@@ -128,7 +129,7 @@ const Onboarding = () => {
           additional_notes: additionalNotes
         }]);
 
-        if (prefsError) throw prefsError;
+        if (tripError) throw tripError;
       }
 
       console.log("Onboarding complete, all data saved successfully");

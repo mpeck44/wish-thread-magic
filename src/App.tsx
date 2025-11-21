@@ -10,6 +10,8 @@ import Onboarding from "./pages/Onboarding";
 import Itinerary from "./pages/Itinerary";
 import Profile from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
+import ProfileOnboarding from "./pages/ProfileOnboarding";
+import TripPlanning from "./pages/TripPlanning";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,9 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/profile-onboarding" element={<ProfileOnboarding />} />
+            <Route path="/trip-planning" element={<TripPlanning />} />
+            <Route path="/trip-planning/:tripId" element={<TripPlanning />} />
             <Route path="/itinerary/:id" element={<Itinerary />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/dashboard" element={<Dashboard />} />
