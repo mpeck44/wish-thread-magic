@@ -87,8 +87,10 @@ const Profile = () => {
 
       if (error) throw error;
 
-      setProfile({ ...profile, avatar_url: newAvatarUrl });
+      // Reload the profile data to ensure consistency
+      await loadData();
       setEditingAvatar(false);
+      
       toast({
         title: "Success",
         description: "Profile picture updated",
@@ -103,6 +105,7 @@ const Profile = () => {
   };
 
   const getIconComponent = (avatarUrl: string) => {
+    console.log("Profile - Getting icon for:", avatarUrl);
     if (!avatarUrl?.startsWith('icon-')) return null;
     
     const iconMap: Record<string, any> = {
