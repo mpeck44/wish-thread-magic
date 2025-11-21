@@ -157,6 +157,8 @@ export default function TripPlanning() {
         additional_notes: additionalNotes,
       };
 
+      let savedTripId: string;
+
       if (tripId) {
         // Update existing trip
         const { error } = await supabase
@@ -165,8 +167,8 @@ export default function TripPlanning() {
           .eq("id", tripId);
         
         if (error) throw error;
+        savedTripId = tripId;
         toast.success("Trip updated successfully!");
-        navigate(`/itinerary/${tripId}?generating=true`);
       } else {
         // Create new trip
         const { data: newTrip, error } = await supabase
@@ -176,14 +178,51 @@ export default function TripPlanning() {
           .single();
         
         if (error) throw error;
-        
-        if (isFirstTime) {
-          toast.success("Your profile and first trip are ready! 🎉");
-          navigate("/");
-        } else {
-          toast.success("Trip created successfully!");
-          navigate(`/itinerary/${newTrip.id}?generating=true`);
+        savedTripId = newTrip.id;
+        toast.success("Trip created!");
+      }
+
+      // Generate the itinerary
+      const generatingToast = toast.loading("Creating your magical itinerary...");
+      
+      // Get family members and profile for context
+      const { data: familyMembers } = await supabase
+        .from("family_members")
+        .select("*")
+        .eq("family_id", familyId);
+      
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      const { data: generatedData, error: genError } = await supabase.functions.invoke(
+        "generate-itinerary",
+        {
+          body: {
+            tripId: savedTripId,
+            tripData: tripData,
+            familyMembers: familyMembers || [],
+            profile: profile,
+          },
         }
+      );
+
+      toast.dismiss(generatingToast);
+
+      if (genError) {
+        console.error("Error generating itinerary:", genError);
+        toast.error("Failed to generate itinerary. You can try again from the itinerary page.");
+      } else {
+        toast.success("Itinerary is being created!");
+      }
+
+      if (isFirstTime) {
+        toast.success("Your profile and first trip are ready! 🎉");
+        navigate("/");
+      } else {
+        navigate(`/itinerary/${savedTripId}?generating=true`);
       }
     } catch (error: any) {
       console.error("Error saving trip:", error);
