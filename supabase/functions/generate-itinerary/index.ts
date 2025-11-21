@@ -13,7 +13,8 @@ Deno.serve(async (req) => {
   try {
     const { tripId, tripData, familyMembers, profile } = await req.json();
     
-    console.log("Generating itinerary for trip:", tripId);
+    // Only log in development (no DENO_DEPLOYMENT_ID means local)
+    const isDev = !Deno.env.get("DENO_DEPLOYMENT_ID");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -102,7 +103,7 @@ Rules:
 - Incorporate theme days if enabled
 - Prioritize must-do experiences`;
 
-    console.log("Calling AI to generate itinerary...");
+    if (isDev) console.log("Calling AI to generate itinerary...");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -133,8 +134,8 @@ Rules:
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      // Log error type without sensitive details
+      console.error("AI gateway error:", { status: response.status, timestamp: new Date().toISOString() });
       return new Response(
         JSON.stringify({ error: "AI gateway error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -150,7 +151,7 @@ Rules:
 
     const itinerary = JSON.parse(itineraryText);
     
-    console.log("Itinerary generated, saving to database...");
+    if (isDev) console.log("Itinerary generated, saving to database...");
 
     // Save the itinerary to the trip
     const { error: updateError } = await supabase
@@ -159,20 +160,24 @@ Rules:
       .eq("id", tripId);
 
     if (updateError) {
-      console.error("Error saving itinerary:", updateError);
+      console.error("Error saving itinerary:", { errorType: updateError.name, timestamp: new Date().toISOString() });
       throw updateError;
     }
 
-    console.log("Itinerary saved successfully!");
+    if (isDev) console.log("Itinerary saved successfully!");
 
     return new Response(
       JSON.stringify({ success: true, itinerary }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error in generate-itinerary:", error);
+    // Log error type without sensitive details
+    console.error("Error in generate-itinerary:", { 
+      errorType: error instanceof Error ? error.name : "Unknown",
+      timestamp: new Date().toISOString()
+    });
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Failed to generate itinerary" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

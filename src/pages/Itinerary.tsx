@@ -26,7 +26,9 @@ const Itinerary = () => {
 
     setPolling(true);
     const interval = setInterval(() => {
-      console.log("Polling for itinerary...");
+      if (import.meta.env.DEV) {
+        console.log("Polling for itinerary...");
+      }
       loadTrip();
     }, 3000); // Poll every 3 seconds
 

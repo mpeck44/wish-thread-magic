@@ -28,7 +28,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
         setProfileComplete(profile?.profile_complete ?? false);
       } catch (error) {
-        console.error("Error checking profile:", error);
+        if (import.meta.env.DEV) {
+          console.error("Error checking profile:", error);
+        }
         setProfileComplete(false);
       } finally {
         setCheckingProfile(false);

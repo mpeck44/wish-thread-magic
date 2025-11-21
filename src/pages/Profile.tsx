@@ -105,7 +105,9 @@ const Profile = () => {
   };
 
   const getIconComponent = (avatarUrl: string) => {
-    console.log("Profile - Getting icon for:", avatarUrl);
+    if (import.meta.env.DEV) {
+      console.log("Profile - Getting icon for:", avatarUrl);
+    }
     if (!avatarUrl?.startsWith('icon-')) return null;
     
     const iconMap: Record<string, any> = {

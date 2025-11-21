@@ -71,7 +71,9 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
         description: "Profile picture uploaded successfully",
       });
     } catch (error: any) {
-      console.error("Error uploading file:", error);
+      if (import.meta.env.DEV) {
+        console.error("Error uploading file:", error);
+      }
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload image",
