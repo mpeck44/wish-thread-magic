@@ -69,17 +69,43 @@ const Itinerary = () => {
 
   const itinerary = trip.itinerary_json;
 
+  // If no itinerary exists yet, show a message
+  if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center px-6">
+        <Card className="max-w-2xl w-full p-12 text-center space-y-6">
+          <div className="animate-bounce mx-auto">
+            <Sparkles className="h-16 w-16 text-primary mx-auto" />
+          </div>
+          <h1 className="text-3xl font-bold">Your Trip is Being Planned!</h1>
+          <p className="text-lg text-muted-foreground">
+            We're creating your magical Disney itinerary. This usually takes a few moments.
+          </p>
+          <div className="pt-4 space-y-3">
+            <Button onClick={() => loadTrip()} variant="outline">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Check if Ready
+            </Button>
+            <div>
+              <Button variant="ghost" onClick={() => navigate("/")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-12 px-6">
       <div className="max-w-5xl mx-auto space-y-8 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+            <Button variant="ghost" onClick={() => navigate("/")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Dashboard
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              Back Home
             </Button>
           </div>
           <div className="flex gap-2">
