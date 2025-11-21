@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ThreadAnimation } from "@/components/ThreadAnimation";
 import { WishForm } from "@/components/WishForm";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ const Index = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -36,6 +37,15 @@ const Index = () => {
       loadProfile();
     }
   }, [user]);
+
+  // Check if user just completed onboarding
+  useEffect(() => {
+    if (searchParams.get("showWishForm") === "true" && profile) {
+      setState("form");
+      // Remove the query param
+      setSearchParams({});
+    }
+  }, [searchParams, profile, setSearchParams]);
 
   const loadProfile = async () => {
     const { data } = await supabase

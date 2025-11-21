@@ -73,25 +73,34 @@ const Onboarding = () => {
         .filter(([_, priority]) => priority !== "none")
         .map(([id, priority]) => `${id}:${priority}`);
 
-      await supabase.from("profiles").update({
+      // Update profile with all onboarding data
+      const { error: profileError } = await supabase.from("profiles").update({
         vibes: selectedInterests,
         budget_level: budgetLevel,
         trip_planning_complete: true,
       }).eq("user_id", user!.id);
 
-      const { data: familyId } = await supabase.rpc("create_family_with_members", {
+      if (profileError) throw profileError;
+
+      // Create family and members
+      const { data: familyId, error: familyError } = await supabase.rpc("create_family_with_members", {
         _name: "My Family",
         _members: familyMembers.map(m => ({ name: m.name, age: m.age?.toString(), vibes: m.specialInterests || [] }))
       });
 
+      if (familyError) throw familyError;
+
       if (familyId) {
-        const { data: members } = await supabase.from("family_members").select("*")
+        const { data: members, error: membersError } = await supabase.from("family_members").select("*")
           .eq("family_id", familyId).order("created_at", { ascending: true });
 
+        if (membersError) throw membersError;
+
+        // Update enhanced family member details
         if (members) {
           for (let i = 0; i < members.length && i < familyMembers.length; i++) {
             const e = familyMembers[i];
-            await supabase.from("family_members").update({
+            const { error: updateError } = await supabase.from("family_members").update({
               dietary_restrictions: e.dietaryRestrictions || [],
               mobility_needs: e.mobilityNeeds,
               height_restrictions: (e.height || 0) < 40,
@@ -99,10 +108,13 @@ const Onboarding = () => {
               energy_level: e.energyLevel,
               special_interests: e.specialInterests || []
             }).eq("id", members[i].id);
+
+            if (updateError) throw updateError;
           }
         }
 
-        await supabase.from("trip_preferences").insert([{
+        // Save trip preferences
+        const { error: prefsError } = await supabase.from("trip_preferences").insert([{
           family_id: familyId,
           accommodation_preference: accommodationPreference,
           trip_duration: tripDuration,
@@ -115,12 +127,22 @@ const Onboarding = () => {
           must_do_experiences: mustDoExperiences,
           additional_notes: additionalNotes
         }]);
+
+        if (prefsError) throw prefsError;
       }
 
+      console.log("Onboarding complete, all data saved successfully");
+      
       setStep("complete");
-      setTimeout(() => navigate("/"), 2000);
+      // Redirect to index with a flag to show the wish form directly
+      setTimeout(() => navigate("/?showWishForm=true"), 2000);
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      console.error("Onboarding completion error:", error);
+      toast({ 
+        title: "Error saving your preferences", 
+        description: error.message || "Please try again", 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
