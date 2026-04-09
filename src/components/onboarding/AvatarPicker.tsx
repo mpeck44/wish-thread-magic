@@ -96,7 +96,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
               key={name}
               type="button"
               onClick={() => onChange(iconUrl)}
-              className={`relative rounded-full p-4 transition-all border-2 ${
+              className={`relative rounded-full p-4 transition-all border-2 flex items-center justify-center aspect-square ${
                 isSelected
                   ? "ring-4 ring-primary scale-110 border-primary bg-primary/10"
                   : "hover:scale-105 border-border/50 hover:border-primary/50"
@@ -109,7 +109,7 @@ export function AvatarPicker({ value, onChange }: AvatarPickerProps) {
         
         {/* Custom Upload Button */}
         <label
-          className={`relative rounded-full p-4 transition-all border-2 cursor-pointer ${
+          className={`relative rounded-full p-4 transition-all border-2 cursor-pointer flex items-center justify-center aspect-square ${
             value.startsWith('http')
               ? "ring-4 ring-primary scale-110 border-primary bg-primary/10"
               : "hover:scale-105 border-border/50 hover:border-primary/50"
