@@ -1,50 +1,81 @@
 
-Goal: after the family step, the user should go to `/trip-planning`, not bounce back to the first onboarding question.
 
-What I found:
-- The save itself is working: the family creation RPC succeeds and `profile_complete` is being set to `true`.
-- The loop is happening after that.
-- The biggest bug is in `src/pages/TripPlanning.tsx`: it fetches the family with `maybeSingle()` for the current profile. Your user already has multiple family rows, so that lookup becomes invalid and the code redirects back to `/profile-onboarding`.
-- There are also stale onboarding references (`/onboarding`) and a service worker caching old route shells, which can make old redirect behavior persist.
+# Premium UI Overhaul Plan
 
-Implementation plan:
-1. Send onboarding to the correct page
-   - Update `src/pages/ProfileOnboarding.tsx` so successful completion navigates to `/trip-planning?firstTime=true&familyId=<returnedFamilyId>` instead of `/`.
+This is a large visual upgrade touching every page and the core design system. The work breaks into 6 phases.
 
-2. Make trip planning handle multiple families safely
-   - Update `src/pages/TripPlanning.tsx` to:
-     - use `familyId` from the URL when present
-     - otherwise fetch the newest family with ordering + `limit(1)`
-     - only redirect to onboarding if no family exists at all
-   - Remove the brittle “all rows + maybeSingle” behavior.
+---
 
-3. Prevent repeat onboarding from creating more duplicate families
-   - In `ProfileOnboarding.tsx`, check whether the user already has a family.
-   - Reuse/update the latest family instead of always creating a brand new one.
-   - If needed, add a small backend RPC to replace members atomically so this remains reliable with RLS.
+## Phase 1: Design System Foundation
 
-4. Separate first-time onboarding from profile editing
-   - Keep `/profile-onboarding` for first-time completion.
-   - Use something like `/profile-onboarding?mode=edit` for later edits.
-   - Update dashboard/profile links that still point to old onboarding paths.
+**Files**: `src/index.css`, `tailwind.config.ts`, `index.html`
 
-5. Clear stale cache behavior
-   - Update `public/sw.js` to stop pinning old HTML route responses and bump the cache version.
-   - Remove old `/onboarding` cache entries so users get the latest navigation logic.
+- **Color palette**: Replace current purple primary with royal purple (`#4A148C` → HSL `270 80% 18%`), add warm gold accent (`#D4AF37` → HSL `43 62% 52%`), vibrant blue secondary (`#1E88E5` → HSL `210 78% 51%`)
+- **Typography**: Import Poppins (headings) + Inter (body) via Google Fonts in `index.html`. Add `fontFamily` entries in Tailwind config. Increase base body size to 16px, add `letterSpacing` utilities for headings
+- **New CSS custom properties**: `--gold`, `--glow-gold`, `--glow-purple` for reusable glow/shadow effects
+- **Sparkle background**: Add a subtle CSS starfield/sparkle pattern as a utility class (pure CSS radial gradients, no images)
+- **Enhanced shadows**: Card shadow with purple tint, gold glow for selected/premium elements
 
-Technical details:
-- I would not auto-delete old family rows in this fix.
-- Safer approach:
-  - always route with the returned/newest `familyId`
-  - stop creating new duplicates going forward
-- Files likely involved:
-  - `src/pages/ProfileOnboarding.tsx`
-  - `src/pages/TripPlanning.tsx`
-  - `src/pages/Dashboard.tsx`
-  - `public/sw.js`
-  - possibly one backend migration for an upsert/replace-family-members RPC
+## Phase 2: Core UI Component Upgrades
 
-Verification:
-- Complete onboarding with a new user and confirm Continue lands on `/trip-planning`.
-- Re-test with a user who already has multiple family rows and confirm it no longer bounces back to onboarding.
-- Refresh after completion to confirm cache no longer restores the old route behavior.
+**Files**: `src/components/ui/button.tsx`, `src/components/ui/card.tsx`, `src/components/ui/badge.tsx`, `src/components/ui/progress.tsx`, `src/components/ui/skeleton.tsx`
+
+- **Button**: Add hover scale+shadow transitions, gradient variants, gold "premium" variant
+- **Card**: Increase padding ~20-30%, add subtle gradient backgrounds, refined border with slight glow on hover, ensure `border-radius` uses the updated `--radius`
+- **Badge**: Create pill-shaped variant with gradient backgrounds and small icon support
+- **Progress**: Style with gradient fill (purple to gold), add subtle shimmer animation
+- **Skeleton**: Add shimmer/sparkle animation instead of plain pulse
+
+## Phase 3: Dashboard Premium Redesign
+
+**File**: `src/pages/Dashboard.tsx`
+
+- **Hero section**: Personalized greeting with animation on load ("Welcome back, {name}! Ready to plan your magical getaway?"), subtle sparkle background
+- **Stat cards**: Add themed icons (compass, fireworks, wand, ticket — all from Lucide), hover glow effects, gradient icon backgrounds
+- **Family member cards**: Refined with more padding, gradient avatar backgrounds, hover elevation
+- **Interest tags**: Pill-shaped with small thematic icons, gradient on "must-do" tags
+- **Trip cards**: Add status badges (planning/completed), progress indicator, hover border glow
+- **Empty states**: Appealing illustrations using abstract magical iconography with CTAs
+- **Menu items**: Add icons, hover animations, active state indicators
+- **Remove**: Any debug/placeholder text
+
+## Phase 4: Auth Page Polish
+
+**File**: `src/pages/Auth.tsx`
+
+- Update to use new color system with royal purple gradient background
+- Add subtle sparkle/star pattern behind the form
+- Gold accent on primary CTA button
+- Smooth fade-in animation on load
+
+## Phase 5: Onboarding & Trip Planning Polish
+
+**Files**: `src/pages/ProfileOnboarding.tsx`, `src/pages/TripPlanning.tsx`, `src/components/onboarding/BudgetAccommodationStep.tsx`, `src/components/onboarding/InterestsStep.tsx`, `src/components/onboarding/InterestCard.tsx`, `src/components/onboarding/ThemeDaysStep.tsx`, `src/components/onboarding/TripVisionStep.tsx`, `src/components/onboarding/FinalReviewStep.tsx`
+
+- **Budget selection**: Gold glow border on "Luxury" tier, abstract crown icon, smooth transition animations between tiers
+- **Interest cards**: Hover scale+shadow micro-animations, gradient backgrounds on selected state
+- **Progress bar**: Gradient fill with shimmer
+- **All step transitions**: Add fade-in-up animations
+- **Replace hardcoded colors** (e.g. `text-purple-900`, `bg-purple-100` in TripPlanning) with design system tokens
+
+## Phase 6: Loading & Feedback States
+
+**Files**: Various pages + possibly a new `src/components/ui/magical-loader.tsx`
+
+- **Loading animation**: Create a reusable sparkle/swirl loader component using CSS animations (rotating stars, pulsing glow)
+- **Skeleton screens**: Use shimmer variant everywhere data loads
+- **Success toasts**: Style with gold accent and subtle animation
+- **Error states**: Maintain premium feel with softer destructive colors
+
+---
+
+## Technical Details
+
+- All new colors in HSL format in CSS custom properties
+- Google Fonts loaded via `<link>` in `index.html` (Poppins 600/700, Inter 400/500)
+- Tailwind `fontFamily` extended: `heading: ['Poppins', 'sans-serif']`, `body: ['Inter', 'sans-serif']`
+- New Tailwind keyframes: `sparkle`, `glow-pulse`, `shimmer-sweep`
+- Hover effects via Tailwind `transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`
+- No external animation libraries needed — pure CSS/Tailwind
+- Approximately 12-15 files modified
+
