@@ -1,77 +1,84 @@
 
 
-# Premium Animation Plan
+# Glassmorphism & Dark-Mode Inspired UI Refresh
 
-A focused set of animations that add polish without visual noise. Everything uses CSS transforms/opacity for performance, respects `prefers-reduced-motion`, and stays under the 2-3 concurrent animation budget.
+Taking design cues from those reference images — the deep purple night-sky gradients, frosted-glass cards, golden warm glows, and teal accent pops — without any Disney IP.
 
 ---
 
-## What to include (and what to skip)
+## What to adopt
 
-**Include:**
-- Budget card hover lift + select glow pulse
-- Radio option select ring pulse + checkmark scale-in
-- Dashboard greeting fade+slide on load
-- "Plan New Trip" button shimmer on hover
-- Onboarding step transitions (fade-in-up, already partially there)
-- Skeleton shimmer (already done)
-- Success confirmation checkmark animation
+- **Dark-first aesthetic**: Shift the default theme to a deep purple-indigo gradient background (the app currently defaults to light). The images feel premium because of the dark canvas.
+- **Glassmorphism cards**: Semi-transparent backgrounds with `backdrop-blur`, subtle white/purple border, and soft glow — replacing the current opaque white cards.
+- **Teal/mint CTA accent**: Add a vibrant teal (`#2DD4A8` or similar) as a new accent for primary action buttons, complementing the existing gold and purple.
+- **Warm golden glow**: Use the existing gold accent more aggressively as a warm ambient glow behind hero elements.
+- **Floating depth**: Cards with layered shadows and slight rotation/offset to suggest depth (like the stacked phone mockups in the images).
 
-**Skip (for now):**
-- Fireworks/castle SVG — high complexity, low ROI for current stage; can revisit later
-- Sparkle particle trails on greeting — risks distraction, hard to keep subtle in CSS-only
-- Drag-and-drop interest reordering — feature change, not animation
+## What to skip
+
+- Castle or character imagery (IP risk)
+- The music player UI (not relevant to trip planning)
 
 ---
 
 ## Changes by file
 
-### 1. `src/index.css` — reduced-motion + new utility classes
+### 1. `src/index.css` — dark-first + glassmorphism utilities
 
-- Add `@media (prefers-reduced-motion: reduce)` block that disables all custom animations
-- Add `.hover-lift` utility: `translateY(-2px)` + shadow increase on hover (150ms ease-out)
-- Add `.select-ring-pulse` utility: a 300ms ring animation for radio selections
-- Add `.shimmer-button` utility: gradient shimmer sliding left-to-right on hover
+- Change `:root` to use the current `.dark` values as default (deep purple background)
+- Add a `.glass-card` utility class: `background: hsl(270 20% 15% / 0.6)`, `backdrop-filter: blur(16px)`, `border: 1px solid hsl(270 40% 40% / 0.2)`
+- Add a `.glass-card-light` variant for lighter sections
+- Add teal accent CSS variable: `--teal: 162 68% 50%`
+- Update `--gradient-hero` to a deep purple-to-indigo sweep
 
-### 2. `tailwind.config.ts` — new keyframes
+### 2. `tailwind.config.ts` — teal color + glass utilities
 
-- `ring-pulse`: border glow that expands and fades over 300ms (one-shot)
-- `check-pop`: scale 0→1.15→1 over 180ms for checkmark reveals
-- `slide-fade-in`: translateY(-6px)→0 + opacity 0→1 over 350ms (greeting)
+- Add `teal` color token mapped to `--teal`
+- Add `glass` boxShadow preset combining inset highlight + outer glow
 
-### 3. `src/components/onboarding/BudgetAccommodationStep.tsx`
+### 3. `src/pages/Auth.tsx` — dark gradient + glass form
 
-- Budget cards: add `hover:-translate-y-0.5 hover:shadow-lg` (subtle lift)
-- Selected card: add a brief scale pulse on selection change using a local state + CSS class that triggers `animate-[check-pop_200ms_ease-out]`
-- Radio options: on select, show a `Check` icon from Lucide that scales in with `animate-[check-pop_180ms_ease-out]` on the right edge
-- Radio card: add `ring-2 ring-primary/0` → `ring-primary/40` transition on selection
+- Set page background to deep purple-indigo gradient
+- Wrap the auth form in a `glass-card` container
+- Change primary CTA to teal accent
+- Add subtle sparkle/star CSS dots in the background
 
-### 4. `src/pages/Dashboard.tsx`
+### 4. `src/pages/Dashboard.tsx` — glassmorphism overhaul
 
-- Greeting: replace `animate-fade-in-up` with the new `slide-fade-in` (smoother, starts from -6px not -20px)
-- "Plan New Trip" button: add `group` class and an inner `<span>` with the shimmer gradient that slides on `group-hover`
-- Stat cards: stagger fade-in using `animation-delay` (0ms, 75ms, 150ms, 225ms) via inline style
+- Set page background to dark gradient
+- Convert all Card components to use `glass-card` styling
+- Hero greeting: add golden ambient glow behind it
+- "Plan New Trip" button: use the teal accent color
+- Stat cards: glass background with subtle purple border glow
+- Update text colors for dark background readability (light foreground)
 
-### 5. `src/components/onboarding/InterestCard.tsx`
+### 5. `src/pages/TripPlanning.tsx` — consistent dark theme
 
-- Add `hover:-translate-y-0.5` for subtle lift
-- On selection, add a brief scale animation: the priority badge fades+scales in with `animate-[check-pop_200ms]`
+- Apply dark gradient background
+- Convert step cards to glassmorphism style
+- Progress indicators: teal fill on dark track
 
-### 6. `src/components/ui/button.tsx`
+### 6. `src/pages/Itinerary.tsx` — glass cards for day views
 
-- `premium` variant: add `overflow-hidden relative` and a `::after` pseudo-element shimmer that activates on hover (via the existing `.shimmer-button` utility or inline Tailwind)
+- Dark background, glass-card day tabs and content panels
 
-### 7. Toast/feedback styling (minor)
+### 7. `src/components/ui/card.tsx` — glass variant
 
-- Success toasts: add a gold-tinted left border and subtle scale-in animation (already partially handled by sonner/radix)
+- Add a `glass` variant to the Card component that applies the glassmorphism styles automatically
+- Keep the default variant for backward compatibility
+
+### 8. `src/components/ui/button.tsx` — teal variant
+
+- Add a `teal` variant: solid teal background, dark text, hover glow
 
 ---
 
 ## Technical details
 
-- All animations use `transform` and `opacity` only — no layout reflows
-- `prefers-reduced-motion: reduce` media query disables sparkle, shimmer, float, pulse-glow, spin-slow, and all new animations; provides static fallbacks
-- New keyframes are one-shot (no infinite loops) except shimmer on hover (only active during interaction)
-- Total new CSS: ~40 lines in index.css, ~15 lines in tailwind keyframes
-- ~6 files modified
+- Dark-first means `:root` gets dark values; a future `.light` class can restore the current light palette
+- Glassmorphism uses `backdrop-filter: blur(16px)` — well-supported in modern browsers
+- Teal color: HSL `162 68% 50%` (~`#2DD4A8`)
+- No images or SVGs needed — all effects are CSS
+- ~8 files modified
+- The existing gold and purple palette stays; teal is additive
 
