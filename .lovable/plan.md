@@ -1,81 +1,77 @@
 
 
-# Premium UI Overhaul Plan
+# Premium Animation Plan
 
-This is a large visual upgrade touching every page and the core design system. The work breaks into 6 phases.
-
----
-
-## Phase 1: Design System Foundation
-
-**Files**: `src/index.css`, `tailwind.config.ts`, `index.html`
-
-- **Color palette**: Replace current purple primary with royal purple (`#4A148C` → HSL `270 80% 18%`), add warm gold accent (`#D4AF37` → HSL `43 62% 52%`), vibrant blue secondary (`#1E88E5` → HSL `210 78% 51%`)
-- **Typography**: Import Poppins (headings) + Inter (body) via Google Fonts in `index.html`. Add `fontFamily` entries in Tailwind config. Increase base body size to 16px, add `letterSpacing` utilities for headings
-- **New CSS custom properties**: `--gold`, `--glow-gold`, `--glow-purple` for reusable glow/shadow effects
-- **Sparkle background**: Add a subtle CSS starfield/sparkle pattern as a utility class (pure CSS radial gradients, no images)
-- **Enhanced shadows**: Card shadow with purple tint, gold glow for selected/premium elements
-
-## Phase 2: Core UI Component Upgrades
-
-**Files**: `src/components/ui/button.tsx`, `src/components/ui/card.tsx`, `src/components/ui/badge.tsx`, `src/components/ui/progress.tsx`, `src/components/ui/skeleton.tsx`
-
-- **Button**: Add hover scale+shadow transitions, gradient variants, gold "premium" variant
-- **Card**: Increase padding ~20-30%, add subtle gradient backgrounds, refined border with slight glow on hover, ensure `border-radius` uses the updated `--radius`
-- **Badge**: Create pill-shaped variant with gradient backgrounds and small icon support
-- **Progress**: Style with gradient fill (purple to gold), add subtle shimmer animation
-- **Skeleton**: Add shimmer/sparkle animation instead of plain pulse
-
-## Phase 3: Dashboard Premium Redesign
-
-**File**: `src/pages/Dashboard.tsx`
-
-- **Hero section**: Personalized greeting with animation on load ("Welcome back, {name}! Ready to plan your magical getaway?"), subtle sparkle background
-- **Stat cards**: Add themed icons (compass, fireworks, wand, ticket — all from Lucide), hover glow effects, gradient icon backgrounds
-- **Family member cards**: Refined with more padding, gradient avatar backgrounds, hover elevation
-- **Interest tags**: Pill-shaped with small thematic icons, gradient on "must-do" tags
-- **Trip cards**: Add status badges (planning/completed), progress indicator, hover border glow
-- **Empty states**: Appealing illustrations using abstract magical iconography with CTAs
-- **Menu items**: Add icons, hover animations, active state indicators
-- **Remove**: Any debug/placeholder text
-
-## Phase 4: Auth Page Polish
-
-**File**: `src/pages/Auth.tsx`
-
-- Update to use new color system with royal purple gradient background
-- Add subtle sparkle/star pattern behind the form
-- Gold accent on primary CTA button
-- Smooth fade-in animation on load
-
-## Phase 5: Onboarding & Trip Planning Polish
-
-**Files**: `src/pages/ProfileOnboarding.tsx`, `src/pages/TripPlanning.tsx`, `src/components/onboarding/BudgetAccommodationStep.tsx`, `src/components/onboarding/InterestsStep.tsx`, `src/components/onboarding/InterestCard.tsx`, `src/components/onboarding/ThemeDaysStep.tsx`, `src/components/onboarding/TripVisionStep.tsx`, `src/components/onboarding/FinalReviewStep.tsx`
-
-- **Budget selection**: Gold glow border on "Luxury" tier, abstract crown icon, smooth transition animations between tiers
-- **Interest cards**: Hover scale+shadow micro-animations, gradient backgrounds on selected state
-- **Progress bar**: Gradient fill with shimmer
-- **All step transitions**: Add fade-in-up animations
-- **Replace hardcoded colors** (e.g. `text-purple-900`, `bg-purple-100` in TripPlanning) with design system tokens
-
-## Phase 6: Loading & Feedback States
-
-**Files**: Various pages + possibly a new `src/components/ui/magical-loader.tsx`
-
-- **Loading animation**: Create a reusable sparkle/swirl loader component using CSS animations (rotating stars, pulsing glow)
-- **Skeleton screens**: Use shimmer variant everywhere data loads
-- **Success toasts**: Style with gold accent and subtle animation
-- **Error states**: Maintain premium feel with softer destructive colors
+A focused set of animations that add polish without visual noise. Everything uses CSS transforms/opacity for performance, respects `prefers-reduced-motion`, and stays under the 2-3 concurrent animation budget.
 
 ---
 
-## Technical Details
+## What to include (and what to skip)
 
-- All new colors in HSL format in CSS custom properties
-- Google Fonts loaded via `<link>` in `index.html` (Poppins 600/700, Inter 400/500)
-- Tailwind `fontFamily` extended: `heading: ['Poppins', 'sans-serif']`, `body: ['Inter', 'sans-serif']`
-- New Tailwind keyframes: `sparkle`, `glow-pulse`, `shimmer-sweep`
-- Hover effects via Tailwind `transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`
-- No external animation libraries needed — pure CSS/Tailwind
-- Approximately 12-15 files modified
+**Include:**
+- Budget card hover lift + select glow pulse
+- Radio option select ring pulse + checkmark scale-in
+- Dashboard greeting fade+slide on load
+- "Plan New Trip" button shimmer on hover
+- Onboarding step transitions (fade-in-up, already partially there)
+- Skeleton shimmer (already done)
+- Success confirmation checkmark animation
+
+**Skip (for now):**
+- Fireworks/castle SVG — high complexity, low ROI for current stage; can revisit later
+- Sparkle particle trails on greeting — risks distraction, hard to keep subtle in CSS-only
+- Drag-and-drop interest reordering — feature change, not animation
+
+---
+
+## Changes by file
+
+### 1. `src/index.css` — reduced-motion + new utility classes
+
+- Add `@media (prefers-reduced-motion: reduce)` block that disables all custom animations
+- Add `.hover-lift` utility: `translateY(-2px)` + shadow increase on hover (150ms ease-out)
+- Add `.select-ring-pulse` utility: a 300ms ring animation for radio selections
+- Add `.shimmer-button` utility: gradient shimmer sliding left-to-right on hover
+
+### 2. `tailwind.config.ts` — new keyframes
+
+- `ring-pulse`: border glow that expands and fades over 300ms (one-shot)
+- `check-pop`: scale 0→1.15→1 over 180ms for checkmark reveals
+- `slide-fade-in`: translateY(-6px)→0 + opacity 0→1 over 350ms (greeting)
+
+### 3. `src/components/onboarding/BudgetAccommodationStep.tsx`
+
+- Budget cards: add `hover:-translate-y-0.5 hover:shadow-lg` (subtle lift)
+- Selected card: add a brief scale pulse on selection change using a local state + CSS class that triggers `animate-[check-pop_200ms_ease-out]`
+- Radio options: on select, show a `Check` icon from Lucide that scales in with `animate-[check-pop_180ms_ease-out]` on the right edge
+- Radio card: add `ring-2 ring-primary/0` → `ring-primary/40` transition on selection
+
+### 4. `src/pages/Dashboard.tsx`
+
+- Greeting: replace `animate-fade-in-up` with the new `slide-fade-in` (smoother, starts from -6px not -20px)
+- "Plan New Trip" button: add `group` class and an inner `<span>` with the shimmer gradient that slides on `group-hover`
+- Stat cards: stagger fade-in using `animation-delay` (0ms, 75ms, 150ms, 225ms) via inline style
+
+### 5. `src/components/onboarding/InterestCard.tsx`
+
+- Add `hover:-translate-y-0.5` for subtle lift
+- On selection, add a brief scale animation: the priority badge fades+scales in with `animate-[check-pop_200ms]`
+
+### 6. `src/components/ui/button.tsx`
+
+- `premium` variant: add `overflow-hidden relative` and a `::after` pseudo-element shimmer that activates on hover (via the existing `.shimmer-button` utility or inline Tailwind)
+
+### 7. Toast/feedback styling (minor)
+
+- Success toasts: add a gold-tinted left border and subtle scale-in animation (already partially handled by sonner/radix)
+
+---
+
+## Technical details
+
+- All animations use `transform` and `opacity` only — no layout reflows
+- `prefers-reduced-motion: reduce` media query disables sparkle, shimmer, float, pulse-glow, spin-slow, and all new animations; provides static fallbacks
+- New keyframes are one-shot (no infinite loops) except shimmer on hover (only active during interaction)
+- Total new CSS: ~40 lines in index.css, ~15 lines in tailwind keyframes
+- ~6 files modified
 
