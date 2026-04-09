@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, ArrowRight, DollarSign, Home, Star, Crown } from "lucide-react";
+import { ArrowLeft, ArrowRight, DollarSign, Home, Star, Crown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BudgetAccommodationStepProps {
@@ -60,7 +60,7 @@ export function BudgetAccommodationStep({
               <Card
                 key={option.value}
                 className={cn(
-                  "p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03]",
+                  "p-6 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
                   isSelected && "border-primary shadow-glow-purple bg-primary/5",
                   isSelected && isLuxury && "border-[hsl(var(--gold))] shadow-glow-gold bg-[hsl(var(--gold)/0.05)]",
                   !isSelected && "hover:bg-muted/50"
@@ -106,7 +106,7 @@ export function BudgetAccommodationStep({
                 className={cn(
                   "p-4 cursor-pointer transition-all duration-200",
                   accommodationPreference === option.value
-                    ? "bg-primary/5 border-primary"
+                    ? "bg-primary/5 border-primary ring-2 ring-primary/30 animate-ring-pulse"
                     : "hover:bg-muted/50"
                 )}
                 onClick={() => onAccommodationChange(option.value)}
@@ -116,6 +116,9 @@ export function BudgetAccommodationStep({
                   <Label htmlFor={option.value} className="flex-1 cursor-pointer font-medium">
                     {option.label}
                   </Label>
+                  {accommodationPreference === option.value && (
+                    <Check className="h-4 w-4 text-primary animate-check-pop" />
+                  )}
                 </div>
               </Card>
             ))}

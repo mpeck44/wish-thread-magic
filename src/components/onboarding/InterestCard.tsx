@@ -25,7 +25,7 @@ export function InterestCard({
     <Card
       onClick={onClick}
       className={cn(
-        "p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03]",
+        "p-6 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg",
         "flex flex-col items-center text-center gap-3 min-h-[180px] justify-center",
         selected && priority === "like" && "bg-primary/5 border-primary shadow-glow-purple",
         selected && priority === "must" && "bg-[hsl(var(--gold)/0.08)] border-[hsl(var(--gold))] shadow-glow-gold",
@@ -53,7 +53,7 @@ export function InterestCard({
 
       {selected && (
         <div className={cn(
-          "text-xs font-medium px-3 py-1 rounded-full",
+          "text-xs font-medium px-3 py-1 rounded-full animate-check-pop",
           priority === "must" ? "bg-[hsl(var(--gold)/0.15)] text-[hsl(var(--gold))]" : "bg-primary/10 text-primary"
         )}>
           {priority === "must" ? "⭐ Must Do" : "❤️ Love It"}

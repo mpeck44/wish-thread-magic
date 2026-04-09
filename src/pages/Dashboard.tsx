@@ -219,7 +219,7 @@ const Dashboard = () => {
                 <Wand2 className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-3xl font-heading font-bold animate-fade-in-up">
+                <h2 className="text-3xl font-heading font-bold animate-slide-fade-in">
                   Welcome back, {profile?.name}! ✨
                 </h2>
                 <p className="text-muted-foreground mt-1">Ready to plan your next magical getaway?</p>
@@ -230,10 +230,10 @@ const Dashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-          {statCards.map((stat) => {
+          {statCards.map((stat, index) => {
             const StatIcon = stat.icon;
             return (
-              <Card key={stat.label} className="group hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+              <Card key={stat.label} className="group hover-lift overflow-hidden animate-fade-in-up" style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2.5">
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color} group-hover:shadow-md transition-shadow`}>
