@@ -117,79 +117,37 @@ export default function ProfileOnboarding() {
 
   const handleComplete = async () => {
     try {
-      // Get profile id
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (!profile) throw new Error("Profile not found");
-      
-      // Create or update family
-      let familyId: string;
-      const { data: existingFamily } = await supabase
-        .from("families")
-        .select("id")
-        .eq("creator_id", profile.id)
-        .maybeSingle();
-      
-      if (existingFamily) {
-        familyId = existingFamily.id;
-      } else {
-        const { data: newFamily, error: familyError } = await supabase
-          .from("families")
-          .insert([{ name: `${name}'s Family`, creator_id: profile.id }])
-          .select()
-          .single();
-        
-        if (familyError) throw familyError;
-        familyId = newFamily.id;
-      }
-      
-      // Delete existing family members and insert new ones
-      await supabase
-        .from("family_members")
-        .delete()
-        .eq("family_id", familyId);
-      
-      if (familyMembers.length > 0) {
-        const { error: membersError } = await supabase
-          .from("family_members")
-          .insert(
-            familyMembers.map(member => ({
-              family_id: familyId,
-              name: member.name,
-              age: member.age,
-              vibes: member.vibes || [],
-              dietary_restrictions: member.dietaryRestrictions || [],
-              mobility_needs: member.mobilityNeeds || null,
-              special_interests: member.specialInterests || [],
-              height_restrictions: member.height ? member.height > 0 : false,
-              nap_schedule: member.napNeeds || false,
-              energy_level: member.energyLevel || null,
-              is_child: member.age ? member.age < 18 : null,
-            }))
-          );
-        
-        if (membersError) throw membersError;
-      }
-      
+      // Use the security definer RPC to create family + members atomically
+      const membersPayload = familyMembers.map(member => ({
+        name: member.name,
+        age: member.age || null,
+        vibes: member.vibes || [],
+      }));
+
+      const { data: familyId, error: rpcError } = await supabase
+        .rpc("create_family_with_members", {
+          _name: `${name}'s Family`,
+          _members: membersPayload,
+        });
+
+      if (rpcError) throw rpcError;
+      if (!familyId) throw new Error("Failed to create family");
+
       // Mark profile as complete
       const { error: completeError } = await supabase
         .from("profiles")
         .update({ profile_complete: true })
         .eq("user_id", user.id);
-      
+
       if (completeError) throw completeError;
-      
+
       toast.success("Profile saved! 🎉", {
         description: "Now let's plan your first magical trip!"
       });
-      
+
       // Chain to trip planning with firstTime flag
       navigate("/trip-planning?firstTime=true");
-      
+
     } catch (error: any) {
       if (import.meta.env.DEV) {
         console.error("Error completing profile setup:", error);
