@@ -146,7 +146,7 @@ export default function ProfileOnboarding() {
       });
 
       // Chain to trip planning with firstTime flag
-      navigate("/trip-planning?firstTime=true");
+      navigate("/");
 
     } catch (error: any) {
       if (import.meta.env.DEV) {
