@@ -10,8 +10,10 @@ import { ThemeDaysStep } from "@/components/onboarding/ThemeDaysStep";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Sparkles, DollarSign, MapPin, Palette, ClipboardCheck } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { MagicalLoader } from "@/components/ui/magical-loader";
 
 type Step = "budget" | "vision" | "themes" | "review" | "generating";
 
@@ -23,112 +25,65 @@ export default function TripPlanning() {
   const [step, setStep] = useState<Step>("budget");
   const [user, setUser] = useState<any>(null);
   const [familyId, setFamilyId] = useState<string>("");
-  
-  // Budget & Accommodation
+
   const [budgetLevel, setBudgetLevel] = useState("moderate");
   const [accommodationPreference, setAccommodationPreference] = useState("value-resort");
-  
-  // Trip Vision
+
   const [tripDuration, setTripDuration] = useState(4);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [pacePreference, setPacePreference] = useState("moderate");
   const [specialOccasions, setSpecialOccasions] = useState<string[]>([]);
   const [mustDoExperiences, setMustDoExperiences] = useState("");
-  
-  // Theme Days
+
   const [themeDaysEnabled, setThemeDaysEnabled] = useState(false);
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
-  
-  // Review
+
   const [additionalNotes, setAdditionalNotes] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+      if (!user) { navigate("/auth"); return; }
       setUser(user);
-      
-      // Get profile and check if completed
+
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-      
-      if (!profile) {
-        toast.error("Profile not found");
-        navigate("/profile-onboarding");
-        return;
-      }
-      
-      if (!profile.profile_complete) {
-        toast.error("Please complete your profile first");
-        navigate("/profile-onboarding");
-        return;
-      }
-      
-      // Get familyId from URL or fetch the newest family
+        .from("profiles").select("*").eq("user_id", user.id).single();
+
+      if (!profile) { toast.error("Profile not found"); navigate("/profile-onboarding"); return; }
+      if (!profile.profile_complete) { toast.error("Please complete your profile first"); navigate("/profile-onboarding"); return; }
+
       const urlFamilyId = searchParams.get("familyId");
       let resolvedFamilyId: string | null = null;
-
       if (urlFamilyId) {
         resolvedFamilyId = urlFamilyId;
       } else {
         const { data: families } = await supabase
-          .from("families")
-          .select("id")
-          .eq("creator_id", profile.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
-
+          .from("families").select("id").eq("creator_id", profile.id)
+          .order("created_at", { ascending: false }).limit(1);
         resolvedFamilyId = families?.[0]?.id || null;
       }
-
-      if (!resolvedFamilyId) {
-        toast.error("Family not found. Please complete your profile.");
-        navigate("/profile-onboarding");
-        return;
-      }
-      
+      if (!resolvedFamilyId) { toast.error("Family not found. Please complete your profile."); navigate("/profile-onboarding"); return; }
       setFamilyId(resolvedFamilyId);
-      
-      // If editing existing trip, load data
-      if (tripId) {
-        loadTripData(tripId);
-      }
+      if (tripId) loadTripData(tripId);
     };
     checkAuth();
   }, [navigate, tripId]);
 
   const loadTripData = async (id: string) => {
     try {
-      const { data: trip, error } = await supabase
-        .from("trips")
-        .select("*")
-        .eq("id", id)
-        .single();
-      
+      const { data: trip, error } = await supabase.from("trips").select("*").eq("id", id).single();
       if (error) throw error;
-      
       if (trip) {
         setBudgetLevel(trip.budget_level || "moderate");
         setAccommodationPreference(trip.accommodation_preference || "value-resort");
         setTripDuration(trip.trip_duration || 4);
         if (trip.visit_dates_start && trip.visit_dates_end) {
-          setDateRange({
-            from: new Date(trip.visit_dates_start),
-            to: new Date(trip.visit_dates_end)
-          });
+          setDateRange({ from: new Date(trip.visit_dates_start), to: new Date(trip.visit_dates_end) });
         }
         setPacePreference(trip.pace_preference || "moderate");
         setSpecialOccasions(trip.special_occasions || []);
         setMustDoExperiences(trip.must_do_experiences || "");
         setThemeDaysEnabled(trip.theme_days_enabled || false);
-        
-        // Safely parse theme_day_preferences
         let themePrefs: string[] = [];
         if (Array.isArray(trip.theme_day_preferences)) {
           themePrefs = trip.theme_day_preferences.map(t => String(t));
@@ -137,21 +92,14 @@ export default function TripPlanning() {
         setAdditionalNotes(trip.additional_notes || "");
       }
     } catch (error: any) {
-      if (import.meta.env.DEV) {
-        console.error("Error loading trip:", error);
-      }
+      if (import.meta.env.DEV) console.error("Error loading trip:", error);
       toast.error("Failed to load trip data");
     }
   };
 
   const handleComplete = async () => {
-    if (!familyId) {
-      toast.error("Family not found");
-      return;
-    }
-
+    if (!familyId) { toast.error("Family not found"); return; }
     setStep("generating");
-
     try {
       const tripData = {
         family_id: familyId,
@@ -170,63 +118,30 @@ export default function TripPlanning() {
       };
 
       let savedTripId: string;
-
       if (tripId) {
-        // Update existing trip
-        const { error } = await supabase
-          .from("trips")
-          .update(tripData)
-          .eq("id", tripId);
-        
+        const { error } = await supabase.from("trips").update(tripData).eq("id", tripId);
         if (error) throw error;
         savedTripId = tripId;
         toast.success("Trip updated successfully!");
       } else {
-        // Create new trip
-        const { data: newTrip, error } = await supabase
-          .from("trips")
-          .insert([tripData])
-          .select()
-          .single();
-        
+        const { data: newTrip, error } = await supabase.from("trips").insert([tripData]).select().single();
         if (error) throw error;
         savedTripId = newTrip.id;
         toast.success("Trip created!");
       }
 
-      // Generate the itinerary
       const generatingToast = toast.loading("Creating your magical itinerary...");
-      
-      // Get family members and profile for context
-      const { data: familyMembers } = await supabase
-        .from("family_members")
-        .select("*")
-        .eq("family_id", familyId);
-      
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
 
-      const { data: generatedData, error: genError } = await supabase.functions.invoke(
-        "generate-itinerary",
-        {
-          body: {
-            tripId: savedTripId,
-            tripData: tripData,
-            familyMembers: familyMembers || [],
-            profile: profile,
-          },
-        }
-      );
+      const { data: familyMembers } = await supabase.from("family_members").select("*").eq("family_id", familyId);
+      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+
+      const { data: generatedData, error: genError } = await supabase.functions.invoke("generate-itinerary", {
+        body: { tripId: savedTripId, tripData, familyMembers: familyMembers || [], profile },
+      });
 
       toast.dismiss(generatingToast);
-
       if (genError) {
-        if (import.meta.env.DEV) {
-          console.error("Error generating itinerary:", genError);
-        }
+        if (import.meta.env.DEV) console.error("Error generating itinerary:", genError);
         toast.error("Failed to generate itinerary. You can try again from the itinerary page.");
       } else {
         toast.success("Itinerary is being created!");
@@ -239,41 +154,65 @@ export default function TripPlanning() {
         navigate(`/itinerary/${savedTripId}?generating=true`);
       }
     } catch (error: any) {
-      if (import.meta.env.DEV) {
-        console.error("Error saving trip:", error);
-      }
+      if (import.meta.env.DEV) console.error("Error saving trip:", error);
       toast.error("Failed to save trip");
       setStep("review");
     }
   };
 
+  const stepIcons = [
+    { icon: DollarSign, label: "Budget" },
+    { icon: MapPin, label: "Vision" },
+    { icon: Palette, label: "Themes" },
+    { icon: ClipboardCheck, label: "Review" },
+  ];
+
   const totalSteps = 4;
-  const currentStepNumber = 
-    step === "budget" ? 1 : 
-    step === "vision" ? 2 : 
-    step === "themes" ? 3 : 
-    step === "review" ? 4 : 4;
+  const currentStepNumber =
+    step === "budget" ? 1 : step === "vision" ? 2 : step === "themes" ? 3 : step === "review" ? 4 : 4;
   const progress = (currentStepNumber / totalSteps) * 100;
 
   if (!user || !familyId) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-12 px-4">
+    <div className="min-h-screen bg-[var(--gradient-hero)] sparkle-bg py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-purple-900 mb-2">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-heading font-bold text-gradient-magic mb-2">
             {tripId ? "Edit Your Trip" : isFirstTime ? "Plan Your First Trip! 🎉" : "Plan Your Disney Adventure"}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             {isFirstTime ? "Almost there! Let's plan your magical Disney trip" : "Let's plan the perfect vacation"}
           </p>
-          <Progress value={progress} className="mt-4 h-2" />
-          <p className="text-sm text-gray-500 mt-2">
-            {isFirstTime ? `Step ${currentStepNumber + 3} of 7` : `Step ${currentStepNumber} of ${totalSteps}`}
-          </p>
+
+          {/* Step Indicators */}
+          <div className="flex items-center justify-center gap-3 mt-6 mb-4">
+            {stepIcons.map((s, i) => {
+              const Icon = s.icon;
+              const isActive = i + 1 === currentStepNumber;
+              const isDone = i + 1 < currentStepNumber;
+              return (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    isActive ? "bg-primary text-primary-foreground shadow-glow-purple" :
+                    isDone ? "bg-primary/20 text-primary" :
+                    "bg-muted text-muted-foreground"
+                  }`}>
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </div>
+                  {i < stepIcons.length - 1 && (
+                    <div className={`w-6 h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <Progress value={progress} className="h-2 max-w-md mx-auto" />
         </div>
 
-        <Card className="p-8">
+        <Card className="p-8 animate-fade-in-up">
           {step === "budget" && (
             <BudgetAccommodationStep
               budgetLevel={budgetLevel}
@@ -314,49 +253,51 @@ export default function TripPlanning() {
           )}
 
           {step === "review" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in-up">
               <div className="text-center mb-6">
-                <Calendar className="w-12 h-12 text-purple-600 mx-auto mb-3" />
-                <h2 className="text-2xl font-bold text-gray-900">Review Your Trip</h2>
-                <p className="text-gray-600">Everything looks good? Let's create your itinerary!</p>
+                <div className="p-4 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full inline-flex mb-4">
+                  <Calendar className="w-10 h-10 text-accent" />
+                </div>
+                <h2 className="text-2xl font-heading font-bold">Review Your Trip</h2>
+                <p className="text-muted-foreground mt-1">Everything looks good? Let's create your itinerary!</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500">Budget Level</p>
-                  <p className="text-lg font-semibold capitalize">{budgetLevel}</p>
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground">Budget Level</p>
+                  <p className="text-lg font-heading font-semibold capitalize">{budgetLevel}</p>
                 </Card>
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500">Accommodation</p>
-                  <p className="text-lg font-semibold capitalize">{accommodationPreference.replace('-', ' ')}</p>
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground">Accommodation</p>
+                  <p className="text-lg font-heading font-semibold capitalize">{accommodationPreference.replace('-', ' ')}</p>
                 </Card>
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500">Trip Duration</p>
-                  <p className="text-lg font-semibold">{tripDuration} days</p>
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground">Trip Duration</p>
+                  <p className="text-lg font-heading font-semibold">{tripDuration} days</p>
                 </Card>
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500">Pace</p>
-                  <p className="text-lg font-semibold capitalize">{pacePreference}</p>
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground">Pace</p>
+                  <p className="text-lg font-heading font-semibold capitalize">{pacePreference}</p>
                 </Card>
               </div>
 
               {dateRange?.from && dateRange?.to && (
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500">Dates</p>
-                  <p className="text-lg font-semibold">
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground">Dates</p>
+                  <p className="text-lg font-heading font-semibold">
                     {dateRange.from.toLocaleDateString()} - {dateRange.to.toLocaleDateString()}
                   </p>
                 </Card>
               )}
 
               {specialOccasions.length > 0 && (
-                <Card className="p-4">
-                  <p className="text-sm text-gray-500 mb-2">Special Occasions</p>
+                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                  <p className="text-sm text-muted-foreground mb-2">Special Occasions</p>
                   <div className="flex flex-wrap gap-2">
                     {specialOccasions.map((occasion) => (
-                      <span key={occasion} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                      <Badge key={occasion} variant="premium">
                         {occasion}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </Card>
@@ -370,6 +311,7 @@ export default function TripPlanning() {
                   onChange={(e) => setAdditionalNotes(e.target.value)}
                   placeholder="Any special requests or notes for your trip..."
                   rows={4}
+                  className="mt-1.5"
                 />
               </div>
 
@@ -377,7 +319,7 @@ export default function TripPlanning() {
                 <Button variant="outline" onClick={() => setStep("themes")} className="flex-1">
                   Back
                 </Button>
-                <Button onClick={handleComplete} size="lg" className="flex-1">
+                <Button onClick={handleComplete} size="lg" variant="premium" className="flex-1">
                   <Sparkles className="w-4 h-4 mr-2" />
                   {tripId ? "Update Trip" : "Create Trip & Generate Itinerary"}
                 </Button>
@@ -386,13 +328,10 @@ export default function TripPlanning() {
           )}
 
           {step === "generating" && (
-            <div className="text-center py-12">
-              <div className="animate-bounce mb-4">
-                <Sparkles className="w-16 h-16 text-purple-600 mx-auto" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Creating Your Trip...</h2>
-              <p className="text-gray-600">Hold tight, we're setting everything up!</p>
-            </div>
+            <MagicalLoader
+              message="Creating Your Magical Trip..."
+              submessage="Hold tight, we're crafting the perfect itinerary for you!"
+            />
           )}
         </Card>
       </div>
