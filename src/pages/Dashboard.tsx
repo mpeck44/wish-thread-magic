@@ -468,8 +468,8 @@ const Dashboard = () => {
       {familyId && (
         <FamilyMemberEditor
           familyId={familyId}
-          isOpen={editorOpen}
-          onClose={() => setEditorOpen(false)}
+          open={editorOpen}
+          onOpenChange={setEditorOpen}
           onSaved={loadDashboardData}
         />
       )}
