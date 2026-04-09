@@ -42,12 +42,12 @@ export function InterestsStep({ value, onChange, onBack, onNext }: InterestsStep
       </div>
 
       <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto gap-2 h-auto p-2 bg-transparent justify-start">
+        <TabsList className="flex flex-wrap w-full gap-2 h-auto p-2 bg-transparent justify-center">
           {INTEREST_CATEGORIES.map((category) => (
             <TabsTrigger
               key={category.id}
               value={category.id}
-              className="shrink-0 border border-border rounded-full px-4 py-2 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary"
+              className="border border-border rounded-full px-4 py-2 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary"
             >
               <span className="mr-1">{category.emoji}</span>
               {category.label}
