@@ -17,6 +17,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         premium: "bg-gradient-to-r from-primary via-secondary to-accent text-primary-foreground shadow-md hover:shadow-lg hover:brightness-110 shimmer-button",
         gold: "bg-[var(--gradient-gold)] text-gold-foreground shadow-md hover:shadow-glow-gold",
+        teal: "bg-teal text-teal-foreground shadow-md hover:shadow-glow-teal hover:brightness-110",
       },
       size: {
         default: "h-10 px-5 py-2",
