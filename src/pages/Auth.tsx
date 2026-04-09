@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Card } from "@/components/ui/card";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -112,12 +113,12 @@ const Auth = () => {
     return (
       <div className="min-h-screen bg-[var(--gradient-hero)] sparkle-bg flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center space-y-6 animate-fade-in-up">
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center shadow-glow-purple">
+          <div className="w-20 h-20 mx-auto glass-card rounded-full flex items-center justify-center shadow-glow-purple">
             <Mail className="w-10 h-10 text-primary" />
           </div>
           <h2 className="text-3xl font-heading font-bold">Check your email</h2>
           <p className="text-muted-foreground">
-            We sent a magic link to <strong>{email}</strong>
+            We sent a magic link to <strong className="text-foreground">{email}</strong>
           </p>
           <Button
             variant="ghost"
@@ -150,13 +151,13 @@ const Auth = () => {
 
         <Card className="p-8">
           {/* Auth Mode Toggle */}
-          <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
+          <div className="flex gap-2 p-1 glass-card-light rounded-lg mb-6">
             <button
               type="button"
               onClick={() => setAuthMode("sign-in")}
               className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 authMode === "sign-in"
-                  ? "bg-background text-foreground shadow-sm"
+                  ? "bg-primary/20 text-foreground shadow-sm border border-primary/30"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -167,7 +168,7 @@ const Auth = () => {
               onClick={() => setAuthMode("sign-up")}
               className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 authMode === "sign-up"
-                  ? "bg-background text-foreground shadow-sm"
+                  ? "bg-primary/20 text-foreground shadow-sm border border-primary/30"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -183,7 +184,7 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-card h-12"
+              className="bg-background/50 border-border h-12"
             />
             <Input
               type="password"
@@ -192,12 +193,12 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="bg-card h-12"
+              className="bg-background/50 border-border h-12"
             />
             <Button
               type="submit"
               className="w-full h-12"
-              variant="premium"
+              variant="teal"
               disabled={loading}
             >
               <Sparkles className="mr-2 h-5 w-5" />
@@ -213,10 +214,10 @@ const Auth = () => {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
+              <span className="bg-card/80 px-2 text-muted-foreground">
                 Or continue with
               </span>
             </div>
@@ -257,8 +258,5 @@ const Auth = () => {
     </div>
   );
 };
-
-// Need Card import for the auth card wrapper
-import { Card } from "@/components/ui/card";
 
 export default Auth;

@@ -53,6 +53,10 @@ export default {
           DEFAULT: "hsl(var(--gold))",
           foreground: "hsl(var(--gold-foreground))",
         },
+        teal: {
+          DEFAULT: "hsl(var(--teal))",
+          foreground: "hsl(var(--teal-foreground))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -76,6 +80,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        glass: "0 8px 32px hsl(0 0% 0% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.05)",
       },
       keyframes: {
         "accordion-down": {
@@ -119,8 +126,8 @@ export default {
           "100%": { transform: "rotate(360deg)" },
         },
         "ring-pulse": {
-          "0%": { boxShadow: "0 0 0 0 hsl(270 80% 30% / 0.4)" },
-          "100%": { boxShadow: "0 0 0 6px hsl(270 80% 30% / 0)" },
+          "0%": { boxShadow: "0 0 0 0 hsl(270 80% 55% / 0.4)" },
+          "100%": { boxShadow: "0 0 0 6px hsl(270 80% 55% / 0)" },
         },
         "check-pop": {
           "0%": { transform: "scale(0)", opacity: "0" },

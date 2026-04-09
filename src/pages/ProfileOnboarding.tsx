@@ -197,15 +197,15 @@ export default function ProfileOnboarding() {
               return (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    isActive ? "bg-primary text-primary-foreground shadow-glow-purple" :
-                    isDone ? "bg-primary/20 text-primary" :
+                    isActive ? "bg-teal text-teal-foreground shadow-glow-teal" :
+                    isDone ? "bg-teal/20 text-teal" :
                     "bg-muted text-muted-foreground"
                   }`}>
                     <Icon className="w-4 h-4" />
                     <span className="hidden sm:inline">{s.label}</span>
                   </div>
                   {i < stepIcons.length - 1 && (
-                    <div className={`w-8 h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                    <div className={`w-8 h-0.5 ${isDone ? "bg-teal" : "bg-muted"}`} />
                   )}
                 </div>
               );
@@ -229,7 +229,7 @@ export default function ProfileOnboarding() {
               <div className="space-y-5">
                 <div>
                   <Label htmlFor="name">Your Name</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" className="mt-1.5 h-12" />
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" className="mt-1.5 h-12 bg-background/50" />
                 </div>
 
                 <div>
@@ -240,10 +240,10 @@ export default function ProfileOnboarding() {
                 <div>
                   <Label htmlFor="role">Your Role</Label>
                   <Select value={familyRole} onValueChange={(value: any) => setFamilyRole(value)}>
-                    <SelectTrigger id="role" className="mt-1.5 h-12">
+                    <SelectTrigger id="role" className="mt-1.5 h-12 bg-background/50">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="glass-card border-border/50">
                       <SelectItem value="mom">Mom</SelectItem>
                       <SelectItem value="dad">Dad</SelectItem>
                       <SelectItem value="grandparent">Grandparent</SelectItem>
@@ -254,7 +254,7 @@ export default function ProfileOnboarding() {
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button onClick={handleProfileSubmit} size="lg" variant="premium">
+                <Button onClick={handleProfileSubmit} size="lg" variant="teal">
                   Continue
                 </Button>
               </div>
@@ -267,7 +267,7 @@ export default function ProfileOnboarding() {
                 <div className="p-4 bg-gradient-to-br from-secondary/10 to-primary/10 rounded-full inline-flex mb-4">
                   <Heart className="w-10 h-10 text-secondary" />
                 </div>
-                <h2 className="text-2xl font-heading font-bold">Your Disney Interests</h2>
+                <h2 className="text-2xl font-heading font-bold">Your Interests</h2>
                 <p className="text-muted-foreground mt-1">Help us understand what you love most</p>
               </div>
               <InterestsStep
@@ -286,7 +286,7 @@ export default function ProfileOnboarding() {
                   <Users className="w-10 h-10 text-accent" />
                 </div>
                 <h2 className="text-2xl font-heading font-bold">Your Travel Companions</h2>
-                <p className="text-muted-foreground mt-1">Who will be joining you on your Disney adventures?</p>
+                <p className="text-muted-foreground mt-1">Who will be joining you on your adventures?</p>
               </div>
               <EnhancedFamilyBuilder
                 members={familyMembers}
