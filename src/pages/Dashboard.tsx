@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import FamilyMemberEditor from "@/components/dashboard/FamilyMemberEditor";
 import {
   Users,
   Heart,
@@ -42,7 +43,9 @@ const Dashboard = () => {
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [tripPreferences, setTripPreferences] = useState<any>(null);
   const [trips, setTrips] = useState<any[]>([]);
+  const [familyId, setFamilyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editorOpen, setEditorOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -76,6 +79,7 @@ const Dashboard = () => {
         .eq("creator_id", profileData.id);
 
       const familyId = familiesData?.[0]?.id;
+      setFamilyId(familyId || null);
 
       if (familyId) {
         // Load family members
@@ -324,7 +328,7 @@ const Dashboard = () => {
                   </CardTitle>
                   <CardDescription>Your travel companions</CardDescription>
                 </div>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/profile-onboarding?mode=edit")}>
+              <Button variant="ghost" size="icon" onClick={() => setEditorOpen(true)}>
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
@@ -357,7 +361,7 @@ const Dashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">No family members added yet</p>
-                  <Button onClick={() => navigate("/profile-onboarding?mode=edit")} variant="outline">
+                  <Button onClick={() => setEditorOpen(true)} variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
                     Add Family Members
                   </Button>
@@ -464,6 +468,14 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </main>
+
+      <FamilyMemberEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        familyMembers={familyMembers}
+        familyId={familyId}
+        onUpdate={loadDashboardData}
+      />
     </div>
   );
 };
