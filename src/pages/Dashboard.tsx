@@ -470,7 +470,8 @@ const Dashboard = () => {
           familyId={familyId}
           open={editorOpen}
           onOpenChange={setEditorOpen}
-          onSaved={loadDashboardData}
+          familyMembers={familyMembers}
+          onUpdate={loadDashboardData}
         />
       )}
     </div>
