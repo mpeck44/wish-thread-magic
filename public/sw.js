@@ -1,19 +1,15 @@
-const CACHE_NAME = 'wishthread-v1';
-const urlsToCache = [
-  '/',
-  '/auth',
-  '/onboarding',
-];
+const CACHE_NAME = 'wishthread-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
+  // Don't cache navigation requests — let the SPA router handle them
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).catch(() => caches.match('/')));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
@@ -31,6 +27,6 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });

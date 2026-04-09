@@ -70,20 +70,30 @@ export default function TripPlanning() {
         return;
       }
       
-      // Get the family for this profile
-      const { data: family } = await supabase
-        .from("families")
-        .select("id")
-        .eq("creator_id", profile.id)
-        .maybeSingle();
-      
-      if (!family) {
+      // Get familyId from URL or fetch the newest family
+      const urlFamilyId = searchParams.get("familyId");
+      let resolvedFamilyId: string | null = null;
+
+      if (urlFamilyId) {
+        resolvedFamilyId = urlFamilyId;
+      } else {
+        const { data: families } = await supabase
+          .from("families")
+          .select("id")
+          .eq("creator_id", profile.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        resolvedFamilyId = families?.[0]?.id || null;
+      }
+
+      if (!resolvedFamilyId) {
         toast.error("Family not found. Please complete your profile.");
         navigate("/profile-onboarding");
         return;
       }
       
-      setFamilyId(family.id);
+      setFamilyId(resolvedFamilyId);
       
       // If editing existing trip, load data
       if (tripId) {
