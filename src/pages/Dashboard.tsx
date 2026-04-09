@@ -324,7 +324,7 @@ const Dashboard = () => {
                   </CardTitle>
                   <CardDescription>Your travel companions</CardDescription>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => navigate("/onboarding")}>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/profile-onboarding?mode=edit")}>
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>
@@ -357,7 +357,7 @@ const Dashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">No family members added yet</p>
-                  <Button onClick={() => navigate("/onboarding")} variant="outline">
+                  <Button onClick={() => navigate("/profile-onboarding?mode=edit")} variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
                     Add Family Members
                   </Button>
@@ -378,7 +378,7 @@ const Dashboard = () => {
                 </CardTitle>
                 <CardDescription>What you love about Disney</CardDescription>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => navigate("/onboarding")}>
+              <Button variant="ghost" size="icon" onClick={() => navigate("/profile-onboarding?mode=edit")}>
                 <Edit className="h-4 w-4" />
               </Button>
             </div>
@@ -403,7 +403,7 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No interests selected yet</p>
-                <Button onClick={() => navigate("/onboarding")} variant="outline">
+                <Button onClick={() => navigate("/profile-onboarding?mode=edit")} variant="outline">
                   <Plus className="mr-2 h-4 w-4" />
                   Select Interests
                 </Button>

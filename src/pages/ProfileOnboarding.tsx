@@ -117,21 +117,63 @@ export default function ProfileOnboarding() {
 
   const handleComplete = async () => {
     try {
-      // Use the security definer RPC to create family + members atomically
-      const membersPayload = familyMembers.map(member => ({
-        name: member.name,
-        age: member.age || null,
-        vibes: member.vibes || [],
-      }));
+      // Check if user already has a family — reuse the newest one
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
 
-      const { data: familyId, error: rpcError } = await supabase
-        .rpc("create_family_with_members", {
-          _name: `${name}'s Family`,
-          _members: membersPayload,
-        });
+      if (!profile) throw new Error("Profile not found");
 
-      if (rpcError) throw rpcError;
-      if (!familyId) throw new Error("Failed to create family");
+      const { data: existingFamilies } = await supabase
+        .from("families")
+        .select("id")
+        .eq("creator_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      let resolvedFamilyId: string;
+
+      if (existingFamilies && existingFamilies.length > 0) {
+        // Reuse existing family — delete old members and re-add
+        resolvedFamilyId = existingFamilies[0].id;
+
+        // Remove old members
+        await supabase
+          .from("family_members")
+          .delete()
+          .eq("family_id", resolvedFamilyId);
+
+        // Insert new members
+        if (familyMembers.length > 0) {
+          const membersToInsert = familyMembers.map(member => ({
+            family_id: resolvedFamilyId,
+            name: member.name,
+            age: member.age || null,
+            vibes: member.vibes || [],
+            is_child: member.age ? member.age < 18 : null,
+          }));
+          await supabase.from("family_members").insert(membersToInsert);
+        }
+      } else {
+        // No family exists — create one via RPC
+        const membersPayload = familyMembers.map(member => ({
+          name: member.name,
+          age: member.age || null,
+          vibes: member.vibes || [],
+        }));
+
+        const { data: newFamilyId, error: rpcError } = await supabase
+          .rpc("create_family_with_members", {
+            _name: `${name}'s Family`,
+            _members: membersPayload,
+          });
+
+        if (rpcError) throw rpcError;
+        if (!newFamilyId) throw new Error("Failed to create family");
+        resolvedFamilyId = newFamilyId;
+      }
 
       // Mark profile as complete
       const { error: completeError } = await supabase
@@ -145,8 +187,7 @@ export default function ProfileOnboarding() {
         description: "Now let's plan your first magical trip!"
       });
 
-      // Chain to trip planning with firstTime flag
-      navigate("/");
+      navigate(`/trip-planning?firstTime=true&familyId=${resolvedFamilyId}`);
 
     } catch (error: any) {
       if (import.meta.env.DEV) {
