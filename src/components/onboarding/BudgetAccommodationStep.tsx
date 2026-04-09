@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, DollarSign, Home, Star, Crown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BudgetAccommodationStepProps {
   budgetLevel: string;
@@ -22,34 +23,10 @@ export function BudgetAccommodationStep({
   onNext,
 }: BudgetAccommodationStepProps) {
   const budgetOptions = [
-    {
-      value: "value",
-      label: "Value",
-      icon: DollarSign,
-      description: "Great experiences on a budget",
-      priceRange: "$-$$",
-    },
-    {
-      value: "moderate",
-      label: "Moderate",
-      icon: Home,
-      description: "Balanced comfort and value",
-      priceRange: "$$-$$$",
-    },
-    {
-      value: "deluxe",
-      label: "Deluxe",
-      icon: Star,
-      description: "Premium experiences",
-      priceRange: "$$$-$$$$",
-    },
-    {
-      value: "luxury",
-      label: "Luxury",
-      icon: Crown,
-      description: "The finest Disney has to offer",
-      priceRange: "$$$$+",
-    },
+    { value: "value", label: "Value", icon: DollarSign, description: "Great experiences on a budget", priceRange: "$-$$" },
+    { value: "moderate", label: "Moderate", icon: Home, description: "Balanced comfort and value", priceRange: "$$-$$$" },
+    { value: "deluxe", label: "Deluxe", icon: Star, description: "Premium experiences", priceRange: "$$$-$$$$" },
+    { value: "luxury", label: "Luxury", icon: Crown, description: "The finest Disney has to offer", priceRange: "$$$$+" },
   ];
 
   const accommodationOptions = [
@@ -61,9 +38,9 @@ export function BudgetAccommodationStep({
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in-up">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+        <h2 className="text-3xl font-heading font-bold text-gradient-magic">
           Let's Talk Budget & Stay
         </h2>
         <p className="text-muted-foreground">
@@ -73,36 +50,41 @@ export function BudgetAccommodationStep({
 
       {/* Budget Level */}
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">What's your budget style?</h3>
+        <h3 className="text-xl font-heading font-semibold">What's your budget style?</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {budgetOptions.map((option) => {
             const Icon = option.icon;
+            const isSelected = budgetLevel === option.value;
+            const isLuxury = option.value === "luxury";
             return (
               <Card
                 key={option.value}
-                className={`p-6 cursor-pointer transition-all hover:scale-105 ${
-                  budgetLevel === option.value
-                    ? "bg-primary/10 border-primary shadow-lg"
-                    : "hover:bg-accent"
-                }`}
+                className={cn(
+                  "p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03]",
+                  isSelected && "border-primary shadow-glow-purple bg-primary/5",
+                  isSelected && isLuxury && "border-[hsl(var(--gold))] shadow-glow-gold bg-[hsl(var(--gold)/0.05)]",
+                  !isSelected && "hover:bg-muted/50"
+                )}
                 onClick={() => onBudgetChange(option.value)}
               >
                 <div className="flex flex-col items-center text-center gap-3">
                   <div
-                    className={`p-3 rounded-full ${
-                      budgetLevel === option.value
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    }`}
+                    className={cn(
+                      "p-3 rounded-full transition-all duration-300",
+                      isSelected && !isLuxury && "bg-primary text-primary-foreground shadow-md",
+                      isSelected && isLuxury && "bg-[hsl(var(--gold))] text-gold-foreground shadow-md",
+                      !isSelected && "bg-muted"
+                    )}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold">{option.label}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {option.description}
-                    </p>
-                    <p className="text-xs text-primary font-medium mt-2">
+                    <h4 className="font-heading font-semibold">{option.label}</h4>
+                    <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
+                    <p className={cn(
+                      "text-xs font-medium mt-2",
+                      isSelected && isLuxury ? "text-[hsl(var(--gold))]" : "text-primary"
+                    )}>
                       {option.priceRange}
                     </p>
                   </div>
@@ -115,25 +97,23 @@ export function BudgetAccommodationStep({
 
       {/* Accommodation Preference */}
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">Where would you like to stay?</h3>
+        <h3 className="text-xl font-heading font-semibold">Where would you like to stay?</h3>
         <RadioGroup value={accommodationPreference} onValueChange={onAccommodationChange}>
           <div className="space-y-3">
             {accommodationOptions.map((option) => (
               <Card
                 key={option.value}
-                className={`p-4 cursor-pointer transition-all ${
+                className={cn(
+                  "p-4 cursor-pointer transition-all duration-200",
                   accommodationPreference === option.value
-                    ? "bg-primary/10 border-primary"
-                    : "hover:bg-accent"
-                }`}
+                    ? "bg-primary/5 border-primary"
+                    : "hover:bg-muted/50"
+                )}
                 onClick={() => onAccommodationChange(option.value)}
               >
                 <div className="flex items-center space-x-3">
                   <RadioGroupItem value={option.value} id={option.value} />
-                  <Label
-                    htmlFor={option.value}
-                    className="flex-1 cursor-pointer font-medium"
-                  >
+                  <Label htmlFor={option.value} className="flex-1 cursor-pointer font-medium">
                     {option.label}
                   </Label>
                 </div>
@@ -148,7 +128,7 @@ export function BudgetAccommodationStep({
           <ArrowLeft className="mr-2 h-5 w-5" />
           Back
         </Button>
-        <Button onClick={onNext} size="lg">
+        <Button onClick={onNext} size="lg" variant="premium">
           Continue
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
