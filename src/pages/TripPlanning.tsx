@@ -179,10 +179,10 @@ export default function TripPlanning() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-heading font-bold text-gradient-magic mb-2">
-            {tripId ? "Edit Your Trip" : isFirstTime ? "Plan Your First Trip! 🎉" : "Plan Your Disney Adventure"}
+            {tripId ? "Edit Your Trip" : isFirstTime ? "Plan Your First Trip! 🎉" : "Plan Your Adventure"}
           </h1>
           <p className="text-muted-foreground">
-            {isFirstTime ? "Almost there! Let's plan your magical Disney trip" : "Let's plan the perfect vacation"}
+            {isFirstTime ? "Almost there! Let's plan your magical trip" : "Let's plan the perfect vacation"}
           </p>
 
           {/* Step Indicators */}
@@ -194,15 +194,15 @@ export default function TripPlanning() {
               return (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    isActive ? "bg-primary text-primary-foreground shadow-glow-purple" :
-                    isDone ? "bg-primary/20 text-primary" :
+                    isActive ? "bg-teal text-teal-foreground shadow-glow-teal" :
+                    isDone ? "bg-teal/20 text-teal" :
                     "bg-muted text-muted-foreground"
                   }`}>
                     <Icon className="w-4 h-4" />
                     <span className="hidden sm:inline">{s.label}</span>
                   </div>
                   {i < stepIcons.length - 1 && (
-                    <div className={`w-6 h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                    <div className={`w-6 h-0.5 ${isDone ? "bg-teal" : "bg-muted"}`} />
                   )}
                 </div>
               );
@@ -263,26 +263,26 @@ export default function TripPlanning() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground">Budget Level</p>
                   <p className="text-lg font-heading font-semibold capitalize">{budgetLevel}</p>
                 </Card>
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground">Accommodation</p>
                   <p className="text-lg font-heading font-semibold capitalize">{accommodationPreference.replace('-', ' ')}</p>
                 </Card>
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground">Trip Duration</p>
                   <p className="text-lg font-heading font-semibold">{tripDuration} days</p>
                 </Card>
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground">Pace</p>
                   <p className="text-lg font-heading font-semibold capitalize">{pacePreference}</p>
                 </Card>
               </div>
 
               {dateRange?.from && dateRange?.to && (
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground">Dates</p>
                   <p className="text-lg font-heading font-semibold">
                     {dateRange.from.toLocaleDateString()} - {dateRange.to.toLocaleDateString()}
@@ -291,7 +291,7 @@ export default function TripPlanning() {
               )}
 
               {specialOccasions.length > 0 && (
-                <Card className="p-5 bg-gradient-to-br from-card to-muted/20">
+                <Card variant="glass-light" className="p-5">
                   <p className="text-sm text-muted-foreground mb-2">Special Occasions</p>
                   <div className="flex flex-wrap gap-2">
                     {specialOccasions.map((occasion) => (
@@ -311,7 +311,7 @@ export default function TripPlanning() {
                   onChange={(e) => setAdditionalNotes(e.target.value)}
                   placeholder="Any special requests or notes for your trip..."
                   rows={4}
-                  className="mt-1.5"
+                  className="mt-1.5 bg-background/50"
                 />
               </div>
 
@@ -319,7 +319,7 @@ export default function TripPlanning() {
                 <Button variant="outline" onClick={() => setStep("themes")} className="flex-1">
                   Back
                 </Button>
-                <Button onClick={handleComplete} size="lg" variant="premium" className="flex-1">
+                <Button onClick={handleComplete} size="lg" variant="teal" className="flex-1">
                   <Sparkles className="w-4 h-4 mr-2" />
                   {tripId ? "Update Trip" : "Create Trip & Generate Itinerary"}
                 </Button>

@@ -149,13 +149,13 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-[var(--gradient-hero)] sparkle-bg">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <Skeleton className="h-14 w-80 mb-4 rounded-lg" />
-          <Skeleton className="h-6 w-60 mb-8 rounded-md" />
+          <Skeleton className="h-14 w-80 mb-4 rounded-lg bg-muted/30" />
+          <Skeleton className="h-6 w-60 mb-8 rounded-md bg-muted/30" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            <Skeleton className="h-36 rounded-lg" />
-            <Skeleton className="h-36 rounded-lg" />
-            <Skeleton className="h-36 rounded-lg" />
-            <Skeleton className="h-36 rounded-lg" />
+            <Skeleton className="h-36 rounded-lg bg-muted/30" />
+            <Skeleton className="h-36 rounded-lg bg-muted/30" />
+            <Skeleton className="h-36 rounded-lg bg-muted/30" />
+            <Skeleton className="h-36 rounded-lg bg-muted/30" />
           </div>
         </div>
       </div>
@@ -175,7 +175,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)]">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-border/50 glass-card-light sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="hover:bg-primary/10">
@@ -196,7 +196,7 @@ const Dashboard = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 glass-card border-border/50">
               <DropdownMenuItem onClick={() => navigate("/profile")} className="gap-2 cursor-pointer">
                 <Settings className="h-4 w-4" />
                 Profile Settings
@@ -213,8 +213,10 @@ const Dashboard = () => {
       <main className="max-w-7xl mx-auto px-4 py-10">
         {/* Hero Welcome Section */}
         <div className="mb-10 relative">
-          <div className="sparkle-bg rounded-2xl p-8 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 border border-primary/10">
-            <div className="flex items-center gap-4 mb-3">
+          <div className="sparkle-bg rounded-2xl p-8 glass-card border-primary/10">
+            {/* Golden ambient glow */}
+            <div className="absolute -top-8 right-16 w-40 h-40 bg-[hsl(var(--gold)/0.08)] rounded-full blur-3xl pointer-events-none" />
+            <div className="flex items-center gap-4 mb-3 relative">
               <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-secondary shadow-glow-purple">
                 <Wand2 className="h-6 w-6 text-primary-foreground" />
               </div>
@@ -269,7 +271,7 @@ const Dashboard = () => {
             <CardContent className="space-y-3">
               <Button
                 size="lg"
-                variant="premium"
+                variant="teal"
                 onClick={() => navigate("/trip-planning")}
                 className="w-full h-auto py-5 justify-start"
               >
@@ -319,7 +321,7 @@ const Dashboard = () => {
                   {familyMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-card to-muted/30 hover:shadow-md transition-all duration-200 group"
+                      className="flex items-center justify-between p-4 rounded-lg glass-card-light hover:shadow-md transition-all duration-200 group"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
@@ -362,9 +364,9 @@ const Dashboard = () => {
               <div>
                 <CardTitle className="flex items-center gap-2.5">
                   <Heart className="h-5 w-5 text-primary" />
-                  Your Disney Interests
+                  Your Interests
                 </CardTitle>
-                <CardDescription>What you love about Disney</CardDescription>
+                <CardDescription>What you love most</CardDescription>
               </div>
               <Button variant="ghost" size="icon" onClick={() => navigate("/profile-onboarding?mode=edit")} className="hover:bg-primary/10">
                 <Edit className="h-4 w-4" />
@@ -424,7 +426,7 @@ const Dashboard = () => {
                 {trips.map((trip) => (
                   <div
                     key={trip.id}
-                    className="flex items-center justify-between p-5 rounded-lg border hover:border-primary/40 hover:shadow-md transition-all duration-200 cursor-pointer group bg-gradient-to-r from-card to-transparent"
+                    className="flex items-center justify-between p-5 rounded-lg glass-card-light hover:border-primary/40 hover:shadow-md transition-all duration-200 cursor-pointer group"
                     onClick={() => navigate(`/itinerary/${trip.id}`)}
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -434,29 +436,28 @@ const Dashboard = () => {
                       <div className="flex-1">
                         <p className="font-medium font-heading mb-1">{trip.wish_text}</p>
                         <div className="flex items-center gap-2">
-                          <Badge variant={trip.itinerary_json ? "gold" : "outline"} className="text-[10px] px-2">
-                            {trip.itinerary_json ? "✓ Complete" : "⏳ Planning"}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(trip.created_at).toLocaleDateString()}
-                          </span>
+                          {trip.budget_level && (
+                            <Badge variant="secondary" className="text-xs">{trip.budget_level}</Badge>
+                          )}
+                          {trip.trip_duration && (
+                            <span className="text-xs text-muted-foreground">
+                              {trip.trip_duration} days
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-14 sparkle-bg rounded-lg">
-                <Sparkles className="h-14 w-14 text-primary/30 mx-auto mb-4 animate-sparkle" />
-                <h3 className="text-lg font-heading font-semibold mb-2">No itineraries yet</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-                  Start by making a wish and we'll create your perfect Disney itinerary!
-                </p>
-                <Button onClick={() => navigate("/")} variant="premium">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Make Your First Wish
+              <div className="text-center py-10 sparkle-bg rounded-lg">
+                <Ticket className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">No itineraries yet</p>
+                <Button onClick={() => navigate("/trip-planning")} variant="teal">
+                  <CalendarPlus className="mr-2 h-4 w-4" />
+                  Plan Your First Trip
                 </Button>
               </div>
             )}
@@ -464,13 +465,14 @@ const Dashboard = () => {
         </Card>
       </main>
 
-      <FamilyMemberEditor
-        open={editorOpen}
-        onOpenChange={setEditorOpen}
-        familyMembers={familyMembers}
-        familyId={familyId}
-        onUpdate={loadDashboardData}
-      />
+      {familyId && (
+        <FamilyMemberEditor
+          familyId={familyId}
+          isOpen={editorOpen}
+          onClose={() => setEditorOpen(false)}
+          onSaved={loadDashboardData}
+        />
+      )}
     </div>
   );
 };

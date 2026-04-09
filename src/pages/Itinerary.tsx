@@ -67,7 +67,7 @@ const Itinerary = () => {
           />
           {polling && (
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal"></div>
               <span>Checking for updates...</span>
             </div>
           )}
@@ -95,7 +95,7 @@ const Itinerary = () => {
               <Calendar className="h-4 w-4" />
               Export Calendar
             </Button>
-            <Button variant="premium" onClick={handleExportPDF} className="gap-2">
+            <Button variant="teal" onClick={handleExportPDF} className="gap-2">
               <Download className="h-4 w-4" />
               Download PDF
             </Button>
@@ -108,7 +108,7 @@ const Itinerary = () => {
         </div>
 
         <Tabs defaultValue="day-0" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-12">
+          <TabsList className="grid w-full grid-cols-3 h-12 glass-card-light">
             {itinerary.days.map((day: any, index: number) => (
               <TabsTrigger key={index} value={`day-${index}`} className="text-sm font-heading">
                 Day {day.day}
@@ -118,7 +118,7 @@ const Itinerary = () => {
 
           {itinerary.days.map((day: any, dayIndex: number) => (
             <TabsContent key={dayIndex} value={`day-${dayIndex}`} className="space-y-6">
-              <Card className="p-7 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+              <Card className="p-7" variant="glass">
                 <div className="space-y-2">
                   <h2 className="text-2xl font-heading font-bold">{day.park}</h2>
                   <p className="text-muted-foreground">{day.theme}</p>
@@ -131,7 +131,7 @@ const Itinerary = () => {
                   Attractions
                 </h3>
                 {day.attractions.map((attraction: any, index: number) => (
-                  <Card key={index} className="p-5 hover:scale-[1.01] transition-all">
+                  <Card key={index} className="p-5 hover:scale-[1.01] transition-all" variant="glass-light">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-3">
@@ -159,7 +159,7 @@ const Itinerary = () => {
                   Dining
                 </h3>
                 {day.dining.map((meal: any, index: number) => (
-                  <Card key={index} className="p-5 bg-accent/5 border-accent/20">
+                  <Card key={index} className="p-5 border-accent/20" variant="glass-light">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
@@ -175,7 +175,7 @@ const Itinerary = () => {
               </div>
 
               {day.rest && (
-                <Card className="p-5 bg-secondary/5 border-secondary/20">
+                <Card className="p-5 border-secondary/20" variant="glass-light">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Coffee className="w-3.5 h-3.5" />
@@ -195,7 +195,7 @@ const Itinerary = () => {
         </Tabs>
 
         <div className="text-center pt-8">
-          <Button size="lg" variant="premium" onClick={() => navigate("/")}>
+          <Button size="lg" variant="teal" onClick={() => navigate("/")}>
             <Sparkles className="mr-2 h-5 w-5" />
             Create Another Trip
           </Button>
